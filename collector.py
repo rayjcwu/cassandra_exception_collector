@@ -28,7 +28,7 @@ def parse_result(string):
   return (filename, exception)
 
 
-def collect_exception(path, exception_string='new.*InvalidRequestException'):
+def collect_exception(path, exception_string='new\ .*InvalidRequestException'):
   result = subprocess.check_output(["grep", "-r", exception_string, path])
   set_dict = defaultdict(set)
   for line in result.splitlines():

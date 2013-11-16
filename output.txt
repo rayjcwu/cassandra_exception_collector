@@ -62,7 +62,6 @@ checkout to  cassandra-2.0.1
 + (String.format("Cannot use selection function %s on collections", tot.isWritetime ? "writeTime" : "ttl"));
 + (String.format("Undefined name %s in selection clause", raw));
 + (String.format("Cannot use selection function %s on PRIMARY KEY part %s", tot.isWritetime ? "writeTime" : "ttl", name));
-+ public void newRow() throws InvalidRequestException
 + (String.format("Undefined name %s in selection clause", rawSelector));
 + (String.format("Unknown function %s called in selection clause", fun.functionName));
 /Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/functions/Functions.java  (file added)
@@ -156,8 +155,6 @@ checkout to  cassandra-2.0.1
 - (String.format("Function %s is only allowed on timeuuid columns", t.function()));
 - (String.format("Undefined name %s in selection clause", t.id()));
 - (e.getMessage());
-- Restriction updateRestriction(CFDefinition.Name name, Restriction restriction, Relation newRel) throws InvalidRequestException
-+ Restriction updateRestriction(CFDefinition.Name name, Restriction restriction, Relation newRel, ColumnSpecification[] boundNames) throws InvalidRequestException
 
 === cassandra-1.2.2 -> cassandra-1.2.3 ===
 /Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/functions/FunctionCall.java  (file added)
@@ -419,5 +416,3 @@ checkout to  cassandra-2.0.1
 - (String.format("Invalid restrictions found on %s", name));
 + (String.format("SELECT DISTINCT queries must only request partition key columns (not %s)", name));
 + (String.format("SELECT DISTINCT queries must request all the partition key columns (missing %s)", name));
-- Restriction updateRestriction(CFDefinition.Name name, Restriction restriction, Relation newRel, ColumnSpecification[] boundNames) throws InvalidRequestException
-+ Restriction updateRestriction(CFDefinition.Name name, Restriction restriction, Relation newRel, VariableSpecifications boundNames) throws InvalidRequestException
