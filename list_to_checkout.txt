@@ -1,0 +1,16 @@
+# put all tags/branches want to use in "git checkout _____" below
+# one tag/branch per line
+# order from older to newer
+cassandra-1.2.0
+cassandra-1.2.1
+cassandra-1.2.2
+cassandra-1.2.3
+cassandra-1.2.4
+cassandra-1.2.5
+cassandra-1.2.6
+cassandra-1.2.7
+cassandra-1.2.8
+cassandra-1.2.9
+cassandra-1.2.10
+cassandra-2.0.0
+cassandra-2.0.1
