@@ -15,6 +15,12 @@ class ExceptionInfo:
     self.version = version
     self.version_idx = version_idx
 
+  def __str__(self):
+    return "%s %s %s" % (self.filename, self.message, self.version)
+
+  def __repr__(self):
+    return self.__str__()
+
 def get_checkout_list(filename):
   """
   Return a list of versions (tags or branches) to checkout
@@ -35,10 +41,10 @@ def parse_result(string):
   """
   idx = string.find(":")
   filename = string[:idx]
-  exception = string[idx + 1:].replace("throw new InvalidRequestException", "")\
+  message = string[idx + 1:].replace("throw new InvalidRequestException", "")\
                               .replace("throw new org.apache.cassandra.exceptions.InvalidRequestException", "")\
                               .strip()
-  return (filename, exception)
+  return (filename, message)
 
 def collect_exception(**kwargs):
   """
@@ -54,12 +60,12 @@ def collect_exception(**kwargs):
   version_idx = kwargs['version_idx']
 
   result = subprocess.check_output(["grep", "-r", exception_string, path])
-  set_dict = defaultdict(set)
+  exception_info_list = []
   for line in result.splitlines():
-    (filename, exception) = parse_result(line)
+    (filename, message) = parse_result(line)
     if filename != "":
-      set_dict[filename].add(exception)
-  return set_dict
+      exception_info_list.append(ExceptionInfo(filename, message, version, version_idx))
+  return exception_info_list
 
 def checkout(to_checkout):
   """
@@ -105,23 +111,46 @@ def compare_digest(from_digest, to_digest):
           file_printed = True
         print d
 
+def group_by_version(exception_info_list):
+  """
+  @type exception_info_list: list [ExceptionInfo]
+  """
+  by_ver_tmp = defaultdict(set)
+  for e in exception_info_list:
+    by_ver_tmp[e.version].add(e)
+
+  by_ver = {}
+  for ver, all_exceptions_in_one_ver in by_ver_tmp.items():
+    by_filename = defaultdict(set)
+    for excpt in all_exceptions_in_one_ver:
+      by_filename[excpt.filename].add(excpt.message)
+
+    by_ver[ver] = by_filename
+
+  return by_ver
+
+
 if __name__ == '__main__':
   checkout_list = get_checkout_list("list_to_checkout.txt")
   os.chdir(PROJECT_ROOT)
   exception_map = {}
 
-  # for to_checkout in checkout_list:
+  exception_info_list = []
   for to_checkout_idx in range(len(checkout_list)):
     to_checkout = checkout_list[to_checkout_idx]
     checkout(to_checkout)
     exception_digest = collect_exception(path=os.path.join(PROJECT_ROOT, "src"),
                                          version=to_checkout,
                                          version_idx=to_checkout_idx)
-    exception_map[to_checkout] = exception_digest
+    exception_info_list.extend(exception_digest)
+
+  # group_by_version
+  by_version = group_by_version(exception_info_list)
+  # print exception_info_list
 
   for i in range(len(checkout_list) - 1):
     print ""
     print "=== %s -> %s ===" % (checkout_list[i], checkout_list[i+1])
-    from_digest = exception_map[checkout_list[i]]
-    to_digest = exception_map[checkout_list[i+1]]
+    from_digest = by_version[checkout_list[i]]
+    to_digest = by_version[checkout_list[i+1]]
     compare_digest(from_digest, to_digest)
