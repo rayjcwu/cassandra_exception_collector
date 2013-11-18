@@ -11,408 +11,536 @@ checkout to  cassandra-1.2.9
 checkout to  cassandra-1.2.10
 checkout to  cassandra-2.0.0
 checkout to  cassandra-2.0.1
-
-=== cassandra-1.2.0 -> cassandra-1.2.1 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/thrift/CassandraServer.java
-+ (
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/thrift/ThriftValidation.java
-- ("Start token sorts after end token");
-- ("exactly one of {start key, end key} or {start token, end token} must be specified");
-+ ("exactly one each of {start key, start token} and {end key, end token} must be specified");
-- ("start key's md5 sorts after end key's md5.  this is not allowed; you probably should not specify end key at all, under RandomPartitioner");
-+ ("start key's token sorts after end key's token.  this is not allowed; you probably should not specify end key at all except with an ordered partitioner");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java
-- ("Only EQ and IN relation are supported on the partition key for RandomPartitioner (unless you use the token() function)");
-+ ("Only EQ and IN relation are supported on the partition key for random partitioners (unless you use the token() function)");
-- ("Start key sorts after end key. This is not allowed; you probably should not specify end key at all, under RandomPartitioner");
-+ ("Start key sorts after end key. This is not allowed; you probably should not specify end key at all under random partitioner");
-+ ("The token() function must be applied to all partition key components or none of them");
-+ (String.format("Function %s is only allowed on timeuuid columns", t.function()));
-+ (String.format("Partition key part %s must be restricted since preceding part is", cname));
-
-=== cassandra-1.2.1 -> cassandra-1.2.2 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Sets.java  (file added)
-+ (e.getMessage());
-+ (String.format("Invalid set literal for %s of type %s", receiver, receiver.type.asCQL3Type()));
-+ (String.format("Invalid set literal for %s: bind variables are not supported inside collection literals", receiver));
-+ (String.format("Invalid set literal for %s: nested collections are not supported", receiver));
-+ (String.format("Invalid set literal for %s: value %s is not of type %s", receiver, rt, valueSpec.type.asCQL3Type()));
-+ (String.format("Invalid set literal: duplicate value %s", rt));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Constants.java  (file added)
-+ (e.getMessage());
-+ ("The negation of " + increment + " overflows supported counter precision (signed 8 bytes integer)");
-+ (String.format("Invalid %s constant (%s) for %s of type %s", type, text, receiver, receiver.type.asCQL3Type()));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Maps.java  (file added)
-+ (String.format("Invalid map literal for %s of type %s", receiver, receiver.type.asCQL3Type()));
-+ (e.getMessage());
-+ (String.format("Invalid map literal for %s: bind variables are not supported inside collection literals", receiver));
-+ (String.format("Invalid map literal for %s: value %s is not of type %s", receiver, entry.right, valueSpec.type.asCQL3Type()));
-+ (String.format("Invalid map literal for %s: nested collections are not supported", receiver));
-+ (String.format("Invalid map literal for %s: key %s is not of type %s", receiver, entry.left, keySpec.type.asCQL3Type()));
-+ (String.format("Invalid map literal: duplicate entry for key %s", entry.left));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/CQL3Type.java  (file added)
-+ ("list type cannot contain another collection");
-+ ("counters are not allowed inside a collection");
-+ ("set type cannot contain another collection");
-+ ("map type cannot contain another collection");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/auth/PasswordAuthenticator.java  (file added)
-+ ("PasswordAuthenticator requires PASSWORD option");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/Selection.java  (file added)
-+ (String.format("Cannot use selection function %s on collections", tot.isWritetime ? "writeTime" : "ttl"));
-+ (String.format("Undefined name %s in selection clause", tot.id));
-+ (String.format("Undefined name %s in selection clause", raw));
-+ (String.format("Cannot use selection function %s on PRIMARY KEY part %s", tot.isWritetime ? "writeTime" : "ttl", name));
-+ (String.format("Undefined name %s in selection clause", rawSelector));
-+ (String.format("Unknown function %s called in selection clause", fun.functionName));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/functions/Functions.java  (file added)
-+ (String.format("Type error: cannot assign result of function %s (type %s) to %s (type %s)", fun.name(), fun.returnType().asCQL3Type(), receiver, receiver.type.asCQL3Type()));
-+ (String.format("Type error: %s cannot be passed as argument %d of function %s of type %s", provided, i, fun.name(), expected.type.asCQL3Type()));
-+ (String.format("Unknown CQL3 function %s called", name));
-+ (String.format("Invalid call to function %s, none of its type signature matches (known type signatures: %s)", name, signatures(factories, receiver)));
-+ (String.format("Ambiguous call to function %s (can match both type signature %s and %s): use type casts to disambiguate", name, signature(candidate), signature(toTest)));
-+ (String.format("Invalid number of arguments in call to function %s: %d required but %d provided", fun.name(), fun.argsType().size(), providedArgs.size()));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Operation.java  (file added)
-+ (String.format("Invalid operation (%s) for non counter column %s", toString(receiver), receiver));
-+ (String.format("Invalid operation (%s) for set column %s", toString(receiver), receiver));
-+ (String.format("Invalid operation (%s) for non collection column %s", toString(receiver), receiver));
-+ (String.format("Invalid operation (%s) for map column %s", toString(receiver), receiver));
-+ (String.format("Invalid deletion operation for non collection column %s", receiver));
-+ (String.format("Invalid operation (%s) for non list column %s", toString(receiver), receiver));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Lists.java  (file added)
-+ (String.format("List index %d out of bound, list has size %d", idx, existingList.size()));
-+ (String.format("Invalid list literal for %s: value %s is not of type %s", receiver, rt, valueSpec.type.asCQL3Type()));
-+ (e.getMessage());
-+ (String.format("Invalid list literal for %s of type %s", receiver, receiver.type.asCQL3Type()));
-+ (String.format("Invalid list literal for %s: bind variables are not supported inside collection literals", receiver));
-+ (String.format("Invalid list literal for %s: nested collections are not supported", receiver));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/TypeCast.java  (file added)
-+ (String.format("Cannot cast value %s to type %s", term, type));
-+ (String.format("Cannot assign value %s to %s of type %s", this, receiver, receiver.type.asCQL3Type()));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/operations/ListOperation.java  (file deleted)
-- (e.getMessage());
-- ("Can't apply operation on column with " + validator + " type.");
-- (String.format("Invalid index %d, list has size %d", idx, list == null ? 0 : list.size()));
-- ("List operations are only supported on List typed columns, but " + validator + " given.");
-- (String.format("Invalid argument %s for %s, must be an integer.", value.getText(), getType()));
-- (String.format("Invalid operation, %s is not of list type", column.name));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Term.java  (file deleted)
-- (e.getMessage());
-- ("Invalid null value for prepared variable " + bindIndex);
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/operations/ColumnOperation.java  (file deleted)
-- (String.format("'%s' is an invalid value, should be a long.", value.getText()));
-- ("The negation of " + val + " overflows supported integer precision (signed 8 bytes integer)");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/operations/MapOperation.java  (file deleted)
-- (e.getMessage());
-- ("Map operations are only supported on Map typed columns, but " + validator + " given.");
-- (String.format("Invalid operation, %s is not of map type", column.name));
-- ("Can't apply operation on column with " + validator + " type.");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/operations/PreparedOperation.java  (file deleted)
-- ("Unsupported syntax, cannot add to a prepared set");
-- ("Unsupported syntax for increment, must be of the form X = X + <value>");
-- ("Unsuppoted syntax, discard syntax for map not supported");
-- ("Unsupported syntax, cannot put to a prepared map");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/operations/SetOperation.java  (file deleted)
-- (e.getMessage());
-- ("Set operations are only supported on Set typed columns, but " + validator + " given.");
-- ("Can't apply operation on column with " + validator + " type.");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/ParsedType.java  (file deleted)
-- ("list type cannot contain another collection");
-- ("counters are not allowed inside a collection");
-- ("set type cannot contain another collection");
-- ("map type cannot contain another collection");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/auth/LegacyAuthenticator.java  (file deleted)
-- ("ALTER USER operation is not supported by LegacyAuthenticator");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateColumnFamilyStatement.java
-+ ("COMPACT STORAGE with non-composite PRIMARY KEY require one column not part of the PRIMARY KEY, none given");
-- (String.format("COMPACT STORAGE with non-composite PRIMARY KEY require one column not part of the PRIMARY KEY (got: %s)", StringUtils.join(stmt.columns.keySet(), ", ")));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/QueryProcessor.java
-+ ("Cannot execute query with bind variables");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/DeleteStatement.java
-- ("Unknown collection type: " + validator.kind);
-- (String.format("Invalid identifier %s for deletion (should not be a PRIMARY KEY part)", column));
-+ (String.format("Invalid identifier %s for deletion (should not be a PRIMARY KEY part)", name));
-- (String.format("Invalid selection %s since %s is neither a list or a map", column, column.id()));
-- (String.format("Missing mandatory PRIMARY KEY part %s since %s specified", firstEmpty, toRemove.iterator().next().left));
-+ (String.format("Missing mandatory PRIMARY KEY part %s since %s specified", firstEmpty, toRemove.iterator().next().columnName));
-- (String.format("Unknown identifier %s", column));
-+ (String.format("Unknown identifier %s", name));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/UpdateStatement.java
-- ("Cannot apply collection operation on column " + name + " with " + name.type + " type.");
-- ("Invalid counter operation on non-counter table.");
-- ("Invalid non-counter operation on counter table.");
-- ("no columns specified for INSERT");
-+ ("No columns provided to INSERT");
-- ("unmatched column names/values");
-+ ("Unmatched column names/values");
-- (String.format("Invalid definition for %s, not a collection type", name));
-- (String.format("Invalid operator %s for key %s", rel.operator(), rel.getEntity()));
-+ (String.format("Invalid operator %s for PRIMARY KEY part %s", rel.operator(), name));
-+ (String.format("Non PRIMARY KEY %s found in where clause", name));
-- (String.format("PRIMARY KEY part %s found in SET part", rel.getEntity()));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java
-- (String.format("Cannot use function %s on PRIMARY KEY part %s", t.function(), name));
-- (String.format("Function %s is not supported on collections", t.function()));
-- (String.format("Function %s is only allowed on timeuuid columns", t.function()));
-- (String.format("Undefined name %s in selection clause", t.id()));
-- (e.getMessage());
-
-=== cassandra-1.2.2 -> cassandra-1.2.3 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/functions/FunctionCall.java  (file added)
-+ (String.format("Invalid null value for argument to %s", fun));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Maps.java
-+ ("Invalid null map key");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Operation.java
-+ (String.format("Cannot set the value of counter column %s (counters can only be incremented/decremented, not set)", receiver));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/DropUserStatement.java
-- (String.format("User %s doesn't exists", username));
-+ (String.format("User %s doesn't exist", username));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/DeleteStatement.java
-- (String.format("Unknown identifier %s", name));
-+ (String.format("Unknown identifier %s", deletion.affectedColumn()));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/UpdateStatement.java
-+ (String.format("Invalid null value for clustering key part %s", name));
-+ (String.format("Invalid null value for partition key part %s", name));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Constants.java
-+ ("Invalid null value for counter increment");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java
-+ ("Invalid null token value");
-+ (String.format("Invalid null clustering key part %s", name));
-+ (String.format("Invalid null value for clustering key part %s", id));
-+ (String.format("Invalid null value for partition key part %s", name));
-+ (String.format("Unsupported null value for indexed column %s", name));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Lists.java
-+ ("Invalid null value for list index");
-
-=== cassandra-1.2.3 -> cassandra-1.2.4 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/Selection.java
-+ (String.format("Unknown function '%s'", withFun.functionName));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Sets.java
-+ ("null is not supported inside collections");
-- (String.format("Invalid set literal for %s: nested collections are not supported", receiver));
-+ (String.format("Set value is too long. Set values are limited to %d bytes but %d bytes value provided",
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Maps.java
-+ ("null is not supported inside collections");
-- (String.format("Invalid map literal for %s: nested collections are not supported", receiver));
-+ (String.format("Map key is too long. Map keys are limited to %d bytes but %d bytes keys provided",
-+ (String.format("Map value is too long. Map values are limited to %d bytes but %d bytes value provided",
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Constants.java
-+ ("Invalid null value for counter increment/decrement");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java
-+ (String.format("Cannot restrict PRIMARY KEY part %s by IN relation as a collection is selected by the query", cname));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Lists.java
-+ ("null is not supported inside collections");
-- (String.format("Invalid list literal for %s: nested collections are not supported", receiver));
-+ (String.format("List value is too long. List values are limited to %d bytes but %d bytes value provided",
-
-=== cassandra-1.2.4 -> cassandra-1.2.5 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/IndexPropDefs.java  (file added)
-+ (String.format("Custom index requires '%s' option to be specified", INDEX_CLASS_KEY));
-+ (String.format("Only custom indexes can currently be parametrized"));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/AlterTableStatement.java
-+ ("When upgrading from Thrift, all the columns of the (composite) clustering key must be renamed together.");
-+ ("When upgrading from Thrift, all the columns of the (composite) partition key must be renamed together.");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateColumnFamilyStatement.java
-- (String.format("Unkown definition %s referenced in PRIMARY KEY", t));
-+ (String.format("Unknown definition %s referenced in PRIMARY KEY", t));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/DeleteStatement.java
-- (String.format("Missing mandatory PRIMARY KEY part %s since %s specified", firstEmpty, toRemove.iterator().next().columnName));
-+ (String.format("Missing mandatory PRIMARY KEY part %s since %s specified", firstEmpty, toRemove.get(0).columnName));
-
-=== cassandra-1.2.5 -> cassandra-1.2.6 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/IndexPropDefs.java  (file deleted)
-- (String.format("Custom index requires '%s' option to be specified", INDEX_CLASS_KEY));
-- (String.format("Only custom indexes can currently be parametrized"));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateIndexStatement.java
-+ ("CUSTOM index requires specifiying the index class");
-+ ("Cannot specify index class for a non-CUSTOM index");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/UpdateStatement.java
-+ (String.format("Column %s is mandatory for this COMPACT STORAGE table", cfDef.value));
-- (String.format("Missing mandatory column %s", cfDef.value));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java
-- ("Only EQ and IN relation are supported on the partition key for random partitioners (unless you use the token() function)");
-+ ("Only EQ and IN relation are supported on the partition key (you will need to use the token() function for non equality based relation)");
-- (String.format("%s cannot be restricted by more than one reation if it includes a IN", name));
-+ (String.format("%s cannot be restricted by more than one relation if it includes a IN", name));
-
-=== cassandra-1.2.6 -> cassandra-1.2.7 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Sets.java
-- (String.format("Invalid set literal: duplicate value %s", rt));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Maps.java
-- (String.format("Invalid map literal: duplicate entry for key %s", entry.left));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/QueryProcessor.java
-- (e.getMessage());
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java
-- ("Cannot use IN operator on column not part of the PRIMARY KEY");
-+ ("Cannot use IN operator on column not part of the partition key");
-- ("Start key must sort before (or equal to) finish key in your partitioner!");
-- ("Start key sorts after end key. This is not allowed; you probably should not specify end key at all under random partitioner");
-- (String.format("Restricting the value of a compact CF (%s) is not supported", name.name));
-+ (String.format("Predicates on the non-primary-key column (%s) of a COMPACT table are not yet supported", name.name));
-
-=== cassandra-1.2.7 -> cassandra-1.2.8 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java
-- ("Select using the token() function don't support IN clause");
-
-=== cassandra-1.2.8 -> cassandra-1.2.9 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateColumnFamilyStatement.java
-- ("Too much columns provided for CLUSTERING ORDER");
-+ ("Only clustering key columns can be defined in CLUSTERING ORDER directive");
-
-=== cassandra-1.2.9 -> cassandra-1.2.10 ===
-
-=== cassandra-1.2.10 -> cassandra-2.0.0 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/transport/messages/BatchMessage.java  (file added)
-+ ("Cannot include non-counter statement in a counter batch");
-+ ("Cannot include counter statement in a non-counter batch");
-+ ("Invalid statement in batch: only UPDATE, INSERT and DELETE statements are allowed.");
-+ (String.format("There were %d markers(?) in CQL but %d bound variables",
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/triggers/TriggerExecutor.java  (file added)
-+ ("Counter mutations and trigger mutations cannot be applied together atomically.");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Attributes.java  (file added)
-+ ("A TTL must be greater or equal to 0");
-+ ("Invalid null value of timestamp");
-+ ("Invalid null value of TTL");
-+ ("Invalid timestamp value");
-+ (String.format("ttl is too large. requested (%d) maximum (%d)", ttl, ExpiringColumn.MAX_TTL));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateTableStatement.java  (file added)
-+ (String.format("counter type is not supported for PRIMARY KEY part %s", t.key));
-+ (String.format("Multiple definition of identifier %s", entry.getElement()));
-+ ("Only clustering key columns can be defined in CLUSTERING ORDER directive");
-+ (String.format("COMPACT STORAGE with composite PRIMARY KEY allows no more than one column not part of the PRIMARY KEY (got: %s)", StringUtils.join(stmt.columns.keySet(), ", ")));
-+ (String.format("Column family names shouldn't be more than %s characters long (got \"%s\")", Schema.NAME_LENGTH, columnFamily()));
-+ (String.format("counter type is not supported for PRIMARY KEY part %s", stmt.columnAliases.get(0)));
-+ (String.format("\"%s\" is not a valid column family name (must be alphanumeric character only: [0-9A-Za-z]+)", columnFamily()));
-+ ("No definition found that is not part of the PRIMARY KEY");
-+ ("You must specify one and only one PRIMARY KEY");
-+ ("Collection types are not supported with COMPACT STORAGE");
-+ (String.format("counter type is not supported for PRIMARY KEY part %s", alias));
-+ (String.format("Unknown definition %s referenced in PRIMARY KEY", t));
-+ ("COMPACT STORAGE with non-composite PRIMARY KEY require one column not part of the PRIMARY KEY, none given");
-+ (String.format("The order of columns in the CLUSTERING ORDER directive must be the one of the clustering key (%s must appear before %s)", c, id));
-+ (String.format("Missing CLUSTERING ORDER for column %s", c));
-+ (String.format("Invalid collection type for PRIMARY KEY component %s", t));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/service/StorageProxy.java  (file added)
-+ ("SERIAL/LOCAL_SERIAL consistency may only be requested for one row at a time");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateColumnFamilyStatement.java  (file deleted)
-- (String.format("counter type is not supported for PRIMARY KEY part %s", t.key));
-- (String.format("Unknown definition %s referenced in PRIMARY KEY", t));
-- ("Only clustering key columns can be defined in CLUSTERING ORDER directive");
-- (String.format("COMPACT STORAGE with composite PRIMARY KEY allows no more than one column not part of the PRIMARY KEY (got: %s)", StringUtils.join(stmt.columns.keySet(), ", ")));
-- (String.format("Column family names shouldn't be more than %s characters long (got \"%s\")", Schema.NAME_LENGTH, columnFamily()));
-- (String.format("counter type is not supported for PRIMARY KEY part %s", stmt.columnAliases.get(0)));
-- (String.format("Missing CLUSTERING ORDER for column %s", c));
-- ("No definition found that is not part of the PRIMARY KEY");
-- (String.format("Multiple definition of identifier %s", entry.getElement()));
-- ("You must specify one and only one PRIMARY KEY");
-- ("Collection types are not supported with COMPACT STORAGE");
-- (String.format("\"%s\" is not a valid column family name (must be alphanumeric character only: [0-9A-Za-z]+)", columnFamily()));
-- ("COMPACT STORAGE with non-composite PRIMARY KEY require one column not part of the PRIMARY KEY, none given");
-- (String.format("The order of columns in the CLUSTERING ORDER directive must be the one of the clustering key (%s must appear before %s)", c, id));
-- (String.format("Invalid collection type for PRIMARY KEY component %s", t));
-- (String.format("counter type is not supported for PRIMARY KEY part %s", alias));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/Selection.java
-- (String.format("Undefined name %s in selection clause", raw));
-- (String.format("Undefined name %s in selection clause", rawSelector));
-+ (String.format("Undefined name %s in selection clause", raw.selectable));
-+ (String.format("Undefined name %s in selection clause", rawSelector.selectable));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/thrift/CassandraServer.java
-+ ("CAS does not support supercolumns");
-+ ("Cross-row paging is not supported along with index clauses");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/AlterTableStatement.java
-+ ("Cannot drop columns from a non-CQL3 CF");
-+ ("Cannot use collection types with Super column family");
-- ("When upgrading from Thrift, all the columns of the (composite) clustering key must be renamed together.");
-- ("When upgrading from Thrift, all the columns of the (composite) partition key must be renamed together.");
-- (String.format("Cannot rename column %s in table %s to %s; another column of that name already exist", from, columnFamily(), to));
-- (String.format("Cannot rename non PRIMARY KEY part %s", from));
-- (String.format("Column %s was not found in table %s", entry.getKey(), columnFamily()));
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/auth/AllowAllAuthenticator.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("ALTER USER operation is not supported by AllowAllAuthenticator"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("CREATE USER operation is not supported by AllowAllAuthenticator"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("DROP USER operation is not supported by AllowAllAuthenticator"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/auth/AllowAllAuthorizer.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("GRANT operation is not supported by AllowAllAuthorizer"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("LIST PERMISSIONS operation is not supported by AllowAllAuthorizer"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("REVOKE operation is not supported by AllowAllAuthorizer"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/auth/LegacyAuthenticator.java
+  cassandra-1.2.0 => cassandra-1.2.1: ("ALTER USER operation is not supported by LegacyAuthenticator"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/auth/LegacyAuthorizer.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("GRANT operation is not supported by LegacyAuthorizer"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("LIST PERMISSIONS operation is not supported by LegacyAuthorizer"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("REVOKE operation is not supported by LegacyAuthorizer"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/auth/PasswordAuthenticator.java
+  cassandra-1.2.2 => cassandra-2.0.1: ("PasswordAuthenticator requires PASSWORD option"); 
 /Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/config/CFMetaData.java
-+ (String.format("Cannot rename column %s because it is secondary indexed", strFrom));
-+ (String.format("Cannot rename column %s to %s in keyspace %s; another column of that name already exist", strFrom, strTo, cfName));
-+ (String.format("Cannot rename non PRIMARY KEY part %s", strFrom));
-+ (String.format("Cannot rename unknown column %s in keyspace %s", strFrom, cfName));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateIndexStatement.java
-- (String.format("Cannot create index on PRIMARY KEY part %s", columnName));
-- (String.format("Cannot create index on column %s of compact CF", columnName));
-+ (String.format("Cannot add secondary index to already primarily indexed column %s", columnName));
-+ (String.format("Secondary index on %s column %s is not yet supported for compact table", cd.type, columnName));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/db/ConsistencyLevel.java
-+ ("Counter operations are inherently non-serializable");
-+ ("Invalid consistency for conditional update. Must be one of SERIAL or LOCAL_SERIAL");
-+ ("You must use conditional updates for serializable writes");
-+ (this + " is not supported as conditional update commit consistency. Use ANY if you mean \"make sure it is accepted but I don't care how many replicas commit it for non-SERIAL reads\"");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/ModificationStatement.java
-- ("A TTL must be greater or equal to 0");
-+ ("Cannot provide custom timestamp for conditional update");
-+ ("Conditional updates are not supported on counter tables");
-+ ("Custom timestamps are not allowed when conditions are used");
-+ ("IN is only supported on the last column of the partition key");
-+ ("IN on the partition key is not supported with conditional updates");
-+ (String.format("Invalid null value for clustering key part %s", name));
-+ (String.format("Invalid null value for partition key part %s", name));
-+ (String.format("Invalid operator %s for PRIMARY KEY part %s", rel.operator(), name));
-+ (String.format("List operation (%s) are not allowed in conditional updates", name));
-+ (String.format("Missing PRIMARY KEY part %s since %s is set", firstEmptyKey.name, name.name));
-+ (String.format("Missing mandatory PRIMARY KEY part %s", name));
-+ (String.format("Multiple definitions found for PRIMARY KEY part %s", name));
-+ (String.format("Non PRIMARY KEY %s found in where clause", name));
-+ (String.format("PRIMARY KEY part %s found in SET part", entry.left));
-+ (String.format("Unknown identifier %s", entry.left));
-+ (String.format("Unknown key identifier %s", rel.getEntity()));
-- (String.format("ttl is too large. requested (%d) maximum (%d)", timeToLive, ExpiringColumn.MAX_TTL));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/DeleteStatement.java
-- (String.format("Missing mandatory PRIMARY KEY part %s since %s specified", firstEmpty, toRemove.get(0).columnName));
-+ (String.format("Missing mandatory PRIMARY KEY part %s since %s specified", getFirstEmptyKey(), deletions.get(0).columnName));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/QueryProcessor.java
-- ("Cannot execute query with bind variables");
-+ ("Invalid amount of bind variables");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/UpdateStatement.java
-- ("IN is only supported on the last column of the partition key");
-- (String.format("Invalid null value for clustering key part %s", name));
-- (String.format("Invalid null value for partition key part %s", name));
-- (String.format("Invalid operator %s for PRIMARY KEY part %s", rel.operator(), name));
-- (String.format("Missing PRIMARY KEY part %s since %s is set", firstEmpty.name, name.name));
-- (String.format("Missing mandatory PRIMARY KEY part %s", name));
-- (String.format("Multiple definitions found for PRIMARY KEY part %s", name));
-- (String.format("Non PRIMARY KEY %s found in where clause", name));
-- (String.format("Unknown key identifier %s", rel.getEntity()));
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/thrift/ThriftValidation.java
-- ("Deletion does not yet support SliceRange predicates.");
-- ("column name length must not be greater than " + IColumn.MAX_NAME_LENGTH);
-+ ("column name length must not be greater than " + maxNameLength);
-- ("supercolumn name length must not be greater than " + IColumn.MAX_NAME_LENGTH);
-+ ("supercolumn name length must not be greater than " + maxNameLength);
-+ (String.format("Invalid cell for CQL3 table %s. The CQL3 column component (%s) does not correspond to a defined CQL3 column",
-+ (String.format("Invalid collection component, %s is not a collection", UTF8Type.instance.getString(CQL3ColumnName)));
-+ (String.format("Not enough components (found %d but %d expected) for column name since %s is a CQL3 table",
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java
-- ("Cannot use IN operator on column not part of the partition key");
-+ ("Invalid limit value");
-+ ("Invalid null value of limit");
-- ("Only EQ and IN relation are supported on the partition key (you will need to use the token() function for non equality based relation)");
-+ ("Only EQ and IN relation are supported on the partition key (unless you use the token() function)");
-+ (String.format("Aliases are not allowed in order by clause ('%s')", column));
-+ (String.format("Aliases aren't allowed in where clause ('%s')", rel));
+  cassandra-1.2.0 => cassandra-2.0.1: ("Invalid column type " + cf_def.column_type); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Cannot rename column %s because it is secondary indexed", strFrom)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Cannot rename column %s to %s in keyspace %s; another column of that name already exist", strFrom, strTo, cfName)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Cannot rename non PRIMARY KEY part %s", strFrom)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Cannot rename unknown column %s in keyspace %s", strFrom, cfName)); 
 /Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql/AlterTableStatement.java
-- ("Invalid column name: "
+  cassandra-1.2.0 => cassandra-2.0.1: ("Can't change CF comparator after creation"); 
+  cassandra-1.2.0 => cassandra-1.2.10: ("Invalid column name: " 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("ALTER COLUMNFAMILY WITH invoked, but no parameters found")); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Column '%s' was not found in CF '%s'", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Invalid validation type %s", 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql/CFPropDefs.java
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("%s cannot be larger than %s", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("%s cannot be larger than %s, (default %s)", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("%s cannot be smaller than %s, (default %s)", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("%s not valid for \"%s\"", value, key)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (bogus + " is not a valid keyword argument for CREATE COLUMNFAMILY"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql/CreateColumnFamilyStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("Invalid column name: " 
+  cassandra-1.2.0 => cassandra-2.0.1: ("You may only specify one PRIMARY KEY"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("You must specify a PRIMARY KEY"); 
+  cassandra-1.2.0 => cassandra-2.0.1: (e.toString()); 
+  cassandra-1.2.0 => cassandra-2.0.1: InvalidRequestException ex = new InvalidRequestException(e.toString()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql/CreateKeyspaceStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("missing required argument \"strategy_class\""); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql/DropIndexStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("Index '" + indexName + "' could not be found in any of the column families of keyspace '" + keyspace + "'"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql/QueryProcessor.java
+  cassandra-1.2.0 => cassandra-2.0.1: ( 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Global TTL on the BATCH statement is not supported."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Index already exists"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Key length of " + key.remaining() + 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Key may not be empty"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Key range clauses must include a start key (i.e. KEY > term)"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("No column definition found for column " + oldCfm.comparator.getString(columnName)); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("No indexed columns present in by-columns clause with \"equals\" operator"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("No such column family: " + createIdx.getColumnFamily()); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Only COUNT(*) and COUNT(1) operations are currently supported."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Start key must sort before (or equal to) finish key in your partitioner!"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Start key sorts after end key. This is not allowed; you probably should not specify end key at all, under RandomPartitioner"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("You cannot combine key range and by-column clauses in a SELECT"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("You cannot combine key range and by-key clauses in a SELECT"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("You cannot use more than one KEY = in a SELECT"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("no keyspace has been specified"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("range finish must come after start in traversal order"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("zero-length column name"); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Expected key '%s' to be present in WHERE clause for '%s'", realKeyAlias, cfm.cfName)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Invalid column value for column (name=%s); %s", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("column name is too long (%s > %s)", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("there were %d markers(?) in CQL but %d bound variables", 
+  cassandra-1.2.0 => cassandra-2.0.1: InvalidRequestException ex = new InvalidRequestException(e.getMessage()); 
+  cassandra-1.2.0 => cassandra-2.0.1: InvalidRequestException ex = new InvalidRequestException(e.toString()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql/Term.java
+  cassandra-1.2.0 => cassandra-2.0.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql/UpdateStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("Mix of commutative and non-commutative operations is not allowed."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Only expressions like X = X + <long> are supported."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("no columns specified for INSERT"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("unmatched column names/values"); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("'%s' is an invalid value, should be a long.", 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/AbstractMarker.java
+  cassandra-2.0.1 => cassandra-2.0.1: ("Invalid IN relation on collection column"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Attributes.java
+  cassandra-2.0.0 => cassandra-2.0.1: ("A TTL must be greater or equal to 0"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Invalid null value of TTL"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Invalid null value of timestamp"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Invalid timestamp value"); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("ttl is too large. requested (%d) maximum (%d)", ttl, ExpiringColumn.MAX_TTL)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/CQL3Type.java
+  cassandra-1.2.2 => cassandra-2.0.1: ("counters are not allowed inside a collection"); 
+  cassandra-1.2.2 => cassandra-2.0.1: ("list type cannot contain another collection"); 
+  cassandra-1.2.2 => cassandra-2.0.1: ("map type cannot contain another collection"); 
+  cassandra-1.2.2 => cassandra-2.0.1: ("set type cannot contain another collection"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Constants.java
+  cassandra-1.2.3 => cassandra-2.0.1: ("Invalid null value for counter increment"); 
+  cassandra-1.2.4 => cassandra-2.0.1: ("Invalid null value for counter increment/decrement"); 
+  cassandra-1.2.2 => cassandra-2.0.1: ("The negation of " + increment + " overflows supported counter precision (signed 8 bytes integer)"); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid %s constant (%s) for %s of type %s", type, text, receiver, receiver.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-2.0.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/IndexPropDefs.java
+  cassandra-1.2.5 => cassandra-1.2.5: (String.format("Custom index requires '%s' option to be specified", INDEX_CLASS_KEY)); 
+  cassandra-1.2.5 => cassandra-1.2.5: (String.format("Only custom indexes can currently be parametrized")); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Lists.java
+  cassandra-1.2.3 => cassandra-2.0.1: ("Invalid null value for list index"); 
+  cassandra-1.2.4 => cassandra-2.0.1: ("null is not supported inside collections"); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid list literal for %s of type %s", receiver, receiver.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid list literal for %s: bind variables are not supported inside collection literals", receiver)); 
+  cassandra-1.2.2 => cassandra-1.2.3: (String.format("Invalid list literal for %s: nested collections are not supported", receiver)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid list literal for %s: value %s is not of type %s", receiver, rt, valueSpec.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("List index %d out of bound, list has size %d", idx, existingList.size())); 
+  cassandra-1.2.4 => cassandra-2.0.1: (String.format("List value is too long. List values are limited to %d bytes but %d bytes value provided", 
+  cassandra-1.2.2 => cassandra-2.0.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Maps.java
+  cassandra-1.2.3 => cassandra-2.0.1: ("Invalid null map key"); 
+  cassandra-1.2.4 => cassandra-2.0.1: ("null is not supported inside collections"); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid map literal for %s of type %s", receiver, receiver.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid map literal for %s: bind variables are not supported inside collection literals", receiver)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid map literal for %s: key %s is not of type %s", receiver, entry.left, keySpec.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-1.2.3: (String.format("Invalid map literal for %s: nested collections are not supported", receiver)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid map literal for %s: value %s is not of type %s", receiver, entry.right, valueSpec.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-1.2.6: (String.format("Invalid map literal: duplicate entry for key %s", entry.left)); 
+  cassandra-1.2.4 => cassandra-2.0.1: (String.format("Map key is too long. Map keys are limited to %d bytes but %d bytes keys provided", 
+  cassandra-1.2.4 => cassandra-2.0.1: (String.format("Map value is too long. Map values are limited to %d bytes but %d bytes value provided", 
+  cassandra-1.2.2 => cassandra-2.0.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Operation.java
+  cassandra-1.2.3 => cassandra-2.0.1: (String.format("Cannot set the value of counter column %s (counters can only be incremented/decremented, not set)", receiver)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid deletion operation for non collection column %s", receiver)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid operation (%s) for map column %s", toString(receiver), receiver)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid operation (%s) for non collection column %s", toString(receiver), receiver)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid operation (%s) for non counter column %s", toString(receiver), receiver)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid operation (%s) for non list column %s", toString(receiver), receiver)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid operation (%s) for set column %s", toString(receiver), receiver)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/ParsedType.java
+  cassandra-1.2.0 => cassandra-1.2.1: ("counters are not allowed inside a collection"); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("list type cannot contain another collection"); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("map type cannot contain another collection"); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("set type cannot contain another collection"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/QueryProcessor.java
+  cassandra-1.2.2 => cassandra-1.2.10: ("Cannot execute query with bind variables"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Invalid amount of bind variables"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Key length of " + key.remaining() + 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Key may not be empty"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("zero-length column name"); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("column name is too long (%s > %s)", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("there were %d markers(?) in CQL but %d bound variables", 
+  cassandra-1.2.0 => cassandra-1.2.6: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Sets.java
+  cassandra-1.2.4 => cassandra-2.0.1: ("null is not supported inside collections"); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid set literal for %s of type %s", receiver, receiver.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid set literal for %s: bind variables are not supported inside collection literals", receiver)); 
+  cassandra-1.2.2 => cassandra-1.2.3: (String.format("Invalid set literal for %s: nested collections are not supported", receiver)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid set literal for %s: value %s is not of type %s", receiver, rt, valueSpec.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-1.2.6: (String.format("Invalid set literal: duplicate value %s", rt)); 
+  cassandra-1.2.4 => cassandra-2.0.1: (String.format("Set value is too long. Set values are limited to %d bytes but %d bytes value provided", 
+  cassandra-1.2.2 => cassandra-2.0.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/Term.java
+  cassandra-1.2.0 => cassandra-1.2.1: ("Invalid null value for prepared variable " + bindIndex); 
+  cassandra-1.2.0 => cassandra-1.2.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/TypeCast.java
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Cannot assign value %s to %s of type %s", this, receiver, receiver.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Cannot cast value %s to type %s", term, type)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/UserOptions.java
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("%s doesn't support %s option", 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/functions/FunctionCall.java
+  cassandra-1.2.3 => cassandra-2.0.1: (String.format("Invalid null value for argument to %s", fun)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/functions/Functions.java
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Ambiguous call to function %s (can match both type signature %s and %s): use type casts to disambiguate", name, signature(candidate), signature(toTest))); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid call to function %s, none of its type signature matches (known type signatures: %s)", name, signatures(factories, receiver))); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid number of arguments in call to function %s: %d required but %d provided", fun.name(), fun.argsType().size(), providedArgs.size())); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Type error: %s cannot be passed as argument %d of function %s of type %s", provided, i, fun.name(), expected.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Type error: cannot assign result of function %s (type %s) to %s (type %s)", fun.name(), fun.returnType().asCQL3Type(), receiver, receiver.type.asCQL3Type())); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Unknown CQL3 function %s called", name)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/operations/ColumnOperation.java
+  cassandra-1.2.0 => cassandra-1.2.1: ("The negation of " + val + " overflows supported integer precision (signed 8 bytes integer)"); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("'%s' is an invalid value, should be a long.", value.getText())); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/operations/ListOperation.java
+  cassandra-1.2.0 => cassandra-1.2.1: ("Can't apply operation on column with " + validator + " type."); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("List operations are only supported on List typed columns, but " + validator + " given."); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Invalid argument %s for %s, must be an integer.", value.getText(), getType())); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Invalid index %d, list has size %d", idx, list == null ? 0 : list.size())); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Invalid operation, %s is not of list type", column.name)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/operations/MapOperation.java
+  cassandra-1.2.0 => cassandra-1.2.1: ("Can't apply operation on column with " + validator + " type."); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("Map operations are only supported on Map typed columns, but " + validator + " given."); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Invalid operation, %s is not of map type", column.name)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/operations/PreparedOperation.java
+  cassandra-1.2.0 => cassandra-1.2.1: ("Unsupported syntax for increment, must be of the form X = X + <value>"); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("Unsupported syntax, cannot add to a prepared set"); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("Unsupported syntax, cannot put to a prepared map"); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("Unsuppoted syntax, discard syntax for map not supported"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/operations/SetOperation.java
+  cassandra-1.2.0 => cassandra-1.2.1: ("Can't apply operation on column with " + validator + " type."); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("Set operations are only supported on Set typed columns, but " + validator + " given."); 
+  cassandra-1.2.0 => cassandra-1.2.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/AlterKeyspaceStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("Cannot alter system keyspace"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Unknown keyspace " + name); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/AlterTableStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("Cannot add new column to a compact CF"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Cannot drop columns from a compact CF"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Cannot drop columns from a non-CQL3 CF"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Cannot use collection types with Super column family"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Cannot use collection types with non-composite PRIMARY KEY"); 
+  cassandra-1.2.5 => cassandra-1.2.10: ("When upgrading from Thrift, all the columns of the (composite) clustering key must be renamed together."); 
+  cassandra-1.2.5 => cassandra-1.2.10: ("When upgrading from Thrift, all the columns of the (composite) partition key must be renamed together."); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("ALTER COLUMNFAMILY WITH invoked, but no parameters found")); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Cannot drop PRIMARY KEY part %s", columnName)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Cannot rename column %s in table %s to %s; another column of that name already exist", from, columnFamily(), to)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Cannot rename non PRIMARY KEY part %s", from)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Column %s was not found in table %s", columnName, columnFamily())); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Column %s was not found in table %s", entry.getKey(), columnFamily())); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Invalid column name %s because it conflicts with a PRIMARY KEY part", columnName)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Invalid column name %s because it conflicts with an existing column", columnName)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("counter type is not supported for PRIMARY KEY part %s", columnName)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/AlterUserStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("ALTER USER can't be empty"); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("User %s doesn't exist", username)); 
 /Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/BatchStatement.java
-- ("A TTL must be greater or equal to 0");
-+ ("Conditional updates are not allowed in batches");
-+ ("Invalid empty consistency level");
-
-=== cassandra-2.0.0 -> cassandra-2.0.1 ===
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/AbstractMarker.java  (file added)
-+ ("Invalid IN relation on collection column");
-/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/Restriction.java  (file added)
-+ ("Invalid null value for IN restriction");
-+ (String.format("Invalid restrictions found on %s", name));
+  cassandra-1.2.0 => cassandra-1.2.10: ("A TTL must be greater or equal to 0"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Conditional updates are not allowed in batches"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Counter mutations are only allowed in COUNTER batches"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Global TTL on the BATCH statement is not supported."); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Invalid empty consistency level"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Only counter mutations are allowed in COUNTER batches"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Timestamp must be set either on BATCH or individual statements"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateColumnFamilyStatement.java
+  cassandra-1.2.2 => cassandra-1.2.10: ("COMPACT STORAGE with non-composite PRIMARY KEY require one column not part of the PRIMARY KEY, none given"); 
+  cassandra-1.2.0 => cassandra-1.2.10: ("Collection types are not supported with COMPACT STORAGE"); 
+  cassandra-1.2.0 => cassandra-1.2.10: ("No definition found that is not part of the PRIMARY KEY"); 
+  cassandra-1.2.9 => cassandra-1.2.10: ("Only clustering key columns can be defined in CLUSTERING ORDER directive"); 
+  cassandra-1.2.0 => cassandra-1.2.8: ("Too much columns provided for CLUSTERING ORDER"); 
+  cassandra-1.2.0 => cassandra-1.2.10: ("You must specify one and only one PRIMARY KEY"); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("COMPACT STORAGE with composite PRIMARY KEY allows no more than one column not part of the PRIMARY KEY (got: %s)", StringUtils.join(stmt.columns.keySet(), ", "))); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("COMPACT STORAGE with non-composite PRIMARY KEY require one column not part of the PRIMARY KEY (got: %s)", StringUtils.join(stmt.columns.keySet(), ", "))); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Column family names shouldn't be more than %s characters long (got \"%s\")", Schema.NAME_LENGTH, columnFamily())); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Invalid collection type for PRIMARY KEY component %s", t)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Missing CLUSTERING ORDER for column %s", c)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Multiple definition of identifier %s", entry.getElement())); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("The order of columns in the CLUSTERING ORDER directive must be the one of the clustering key (%s must appear before %s)", c, id)); 
+  cassandra-1.2.5 => cassandra-1.2.10: (String.format("Unknown definition %s referenced in PRIMARY KEY", t)); 
+  cassandra-1.2.0 => cassandra-1.2.4: (String.format("Unkown definition %s referenced in PRIMARY KEY", t)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("\"%s\" is not a valid column family name (must be alphanumeric character only: [0-9A-Za-z]+)", columnFamily())); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("counter type is not supported for PRIMARY KEY part %s", alias)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("counter type is not supported for PRIMARY KEY part %s", stmt.columnAliases.get(0))); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("counter type is not supported for PRIMARY KEY part %s", t.key)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateIndexStatement.java
+  cassandra-1.2.6 => cassandra-2.0.1: ("CUSTOM index requires specifiying the index class"); 
+  cassandra-1.2.6 => cassandra-2.0.1: ("Cannot specify index class for a non-CUSTOM index"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Index already exists"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Indexes on collections are no yet supported"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("No column definition found for column " + columnName); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Cannot add secondary index to already primarily indexed column %s", columnName)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Cannot create index on PRIMARY KEY part %s", columnName)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Cannot create index on column %s of compact CF", columnName)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Secondary index on %s column %s is not yet supported for compact table", cd.type, columnName)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateKeyspaceStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Keyspace names shouldn't be more than %s characters long (got \"%s\")", Schema.NAME_LENGTH, name)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("\"%s\" is not a valid keyspace name", name)); 
 /Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateTableStatement.java
-+ ("Multiple PRIMARY KEYs specifed (exactly one required)");
-+ ("No PRIMARY KEY specifed (exactly one required)");
-- ("You must specify one and only one PRIMARY KEY");
+  cassandra-2.0.0 => cassandra-2.0.1: ("COMPACT STORAGE with non-composite PRIMARY KEY require one column not part of the PRIMARY KEY, none given"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Collection types are not supported with COMPACT STORAGE"); 
+  cassandra-2.0.1 => cassandra-2.0.1: ("Multiple PRIMARY KEYs specifed (exactly one required)"); 
+  cassandra-2.0.1 => cassandra-2.0.1: ("No PRIMARY KEY specifed (exactly one required)"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("No definition found that is not part of the PRIMARY KEY"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Only clustering key columns can be defined in CLUSTERING ORDER directive"); 
+  cassandra-2.0.0 => cassandra-2.0.0: ("You must specify one and only one PRIMARY KEY"); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("COMPACT STORAGE with composite PRIMARY KEY allows no more than one column not part of the PRIMARY KEY (got: %s)", StringUtils.join(stmt.columns.keySet(), ", "))); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Column family names shouldn't be more than %s characters long (got \"%s\")", Schema.NAME_LENGTH, columnFamily())); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Invalid collection type for PRIMARY KEY component %s", t)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Missing CLUSTERING ORDER for column %s", c)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Multiple definition of identifier %s", entry.getElement())); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("The order of columns in the CLUSTERING ORDER directive must be the one of the clustering key (%s must appear before %s)", c, id)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Unknown definition %s referenced in PRIMARY KEY", t)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("\"%s\" is not a valid column family name (must be alphanumeric character only: [0-9A-Za-z]+)", columnFamily())); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("counter type is not supported for PRIMARY KEY part %s", alias)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("counter type is not supported for PRIMARY KEY part %s", stmt.columnAliases.get(0))); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("counter type is not supported for PRIMARY KEY part %s", t.key)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/CreateUserStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("Username can't be an empty string"); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("User %s already exists", username)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/DeleteStatement.java
+  cassandra-1.2.0 => cassandra-1.2.1: ("Unknown collection type: " + validator.kind); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Invalid identifier %s for deletion (should not be a PRIMARY KEY part)", column)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Invalid identifier %s for deletion (should not be a PRIMARY KEY part)", name)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Invalid selection %s since %s is neither a list or a map", column, column.id())); 
+  cassandra-1.2.5 => cassandra-1.2.10: (String.format("Missing mandatory PRIMARY KEY part %s since %s specified", firstEmpty, toRemove.get(0).columnName)); 
+  cassandra-1.2.2 => cassandra-1.2.4: (String.format("Missing mandatory PRIMARY KEY part %s since %s specified", firstEmpty, toRemove.iterator().next().columnName)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Missing mandatory PRIMARY KEY part %s since %s specified", firstEmpty, toRemove.iterator().next().left)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Missing mandatory PRIMARY KEY part %s since %s specified", getFirstEmptyKey(), deletions.get(0).columnName)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Unknown identifier %s", column)); 
+  cassandra-1.2.3 => cassandra-2.0.1: (String.format("Unknown identifier %s", deletion.affectedColumn())); 
+  cassandra-1.2.2 => cassandra-1.2.2: (String.format("Unknown identifier %s", name)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/DropIndexStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("Index '" + indexName + "' could not be found in any of the column families of keyspace '" + keyspace() + "'"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/DropUserStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("Users aren't allowed to DROP themselves"); 
+  cassandra-1.2.3 => cassandra-2.0.1: (String.format("User %s doesn't exist", username)); 
+  cassandra-1.2.0 => cassandra-1.2.2: (String.format("User %s doesn't exists", username)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/ListPermissionsStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("%s doesn't exist", resource)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("User %s doesn't exist", username)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/ModificationStatement.java
+  cassandra-1.2.0 => cassandra-1.2.10: ("A TTL must be greater or equal to 0"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Cannot provide custom timestamp for conditional update"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Conditional updates are not supported on counter tables"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Custom timestamps are not allowed when conditions are used"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("IN is only supported on the last column of the partition key"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("IN on the partition key is not supported with conditional updates"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Invalid empty consistency level"); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Invalid null value for clustering key part %s", name)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Invalid null value for partition key part %s", name)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Invalid operator %s for PRIMARY KEY part %s", rel.operator(), name)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("List operation (%s) are not allowed in conditional updates", name)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Missing PRIMARY KEY part %s since %s is set", firstEmptyKey.name, name.name)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Missing mandatory PRIMARY KEY part %s", name)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Multiple definitions found for PRIMARY KEY part %s", name)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Non PRIMARY KEY %s found in where clause", name)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("PRIMARY KEY part %s found in SET part", entry.left)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Unknown identifier %s", entry.left)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Unknown key identifier %s", rel.getEntity())); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Write operation require a read but consistency %s is not supported on reads", cl)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("ttl is too large. requested (%d) maximum (%d)", timeToLive, ExpiringColumn.MAX_TTL)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/PermissionAlteringStatement.java
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("%s doesn't exist", resource)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("User %s doesn't exist", username)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/Restriction.java
+  cassandra-2.0.1 => cassandra-2.0.1: ("Invalid null value for IN restriction"); 
+  cassandra-2.0.1 => cassandra-2.0.1: (String.format("Invalid restrictions found on %s", name)); 
 /Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/SelectStatement.java
-+ ("IN restrictions are not supported on indexed columns");
-+ (String.format("IN predicates on non-primary-key columns (%s) is not yet supported", name));
-- (String.format("Invalid restrictions found on %s", name));
-+ (String.format("SELECT DISTINCT queries must only request partition key columns (not %s)", name));
-+ (String.format("SELECT DISTINCT queries must request all the partition key columns (missing %s)", name));
+  cassandra-1.2.0 => cassandra-2.0.1: ("Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. " 
+  cassandra-1.2.0 => cassandra-1.2.6: ("Cannot use IN operator on column not part of the PRIMARY KEY"); 
+  cassandra-1.2.7 => cassandra-1.2.10: ("Cannot use IN operator on column not part of the partition key"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("IN is only supported on the last column of the partition key"); 
+  cassandra-2.0.1 => cassandra-2.0.1: ("IN restrictions are not supported on indexed columns"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Index expression values may not be larger than 64K"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Invalid empty consistency level"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Invalid limit value"); 
+  cassandra-1.2.3 => cassandra-2.0.1: ("Invalid null token value"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Invalid null value of limit"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("LIMIT must be strictly positive"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("No indexed columns present in by-columns clause with Equal operator"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("ORDER BY could not be used on columns missing in select clause."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("ORDER BY is only supported when the partition key is restricted by an EQ or an IN."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("ORDER BY with 2ndary indexes is not supported."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Only COUNT(*) and COUNT(1) operations are currently supported."); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Only EQ and IN relation are supported on the partition key (unless you use the token() function)"); 
+  cassandra-1.2.6 => cassandra-1.2.10: ("Only EQ and IN relation are supported on the partition key (you will need to use the token() function for non equality based relation)"); 
+  cassandra-1.2.0 => cassandra-1.2.0: ("Only EQ and IN relation are supported on the partition key for RandomPartitioner (unless you use the token() function)"); 
+  cassandra-1.2.1 => cassandra-1.2.5: ("Only EQ and IN relation are supported on the partition key for random partitioners (unless you use the token() function)"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Select on indexed columns and with IN clause for the PRIMARY KEY are not supported"); 
+  cassandra-1.2.0 => cassandra-1.2.7: ("Select using the token() function don't support IN clause"); 
+  cassandra-1.2.0 => cassandra-1.2.6: ("Start key must sort before (or equal to) finish key in your partitioner!"); 
+  cassandra-1.2.1 => cassandra-1.2.6: ("Start key sorts after end key. This is not allowed; you probably should not specify end key at all under random partitioner"); 
+  cassandra-1.2.0 => cassandra-1.2.0: ("Start key sorts after end key. This is not allowed; you probably should not specify end key at all, under RandomPartitioner"); 
+  cassandra-1.2.1 => cassandra-2.0.1: ("The token() function must be applied to all partition key components or none of them"); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("%s cannot be restricted by both an equal and an inequal relation", name)); 
+  cassandra-1.2.0 => cassandra-1.2.5: (String.format("%s cannot be restricted by more than one reation if it includes a IN", name)); 
+  cassandra-1.2.6 => cassandra-2.0.1: (String.format("%s cannot be restricted by more than one relation if it includes a IN", name)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("%s cannot be restricted by more than one relation if it includes an Equal", name)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Aliases are not allowed in order by clause ('%s')", column)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Aliases aren't allowed in where clause ('%s')", rel)); 
+  cassandra-1.2.4 => cassandra-2.0.1: (String.format("Cannot restrict PRIMARY KEY part %s by IN relation as a collection is selected by the query", cname)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Cannot use function %s on PRIMARY KEY part %s", t.function(), name)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Function %s is not supported on collections", t.function())); 
+  cassandra-1.2.1 => cassandra-1.2.1: (String.format("Function %s is only allowed on timeuuid columns", t.function())); 
+  cassandra-2.0.1 => cassandra-2.0.1: (String.format("IN predicates on non-primary-key columns (%s) is not yet supported", name)); 
+  cassandra-1.2.3 => cassandra-2.0.1: (String.format("Invalid null clustering key part %s", name)); 
+  cassandra-1.2.3 => cassandra-2.0.1: (String.format("Invalid null value for clustering key part %s", id)); 
+  cassandra-1.2.3 => cassandra-2.0.1: (String.format("Invalid null value for partition key part %s", name)); 
+  cassandra-1.2.0 => cassandra-2.0.0: (String.format("Invalid restrictions found on %s", name)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Order by currently only support the ordering of columns following their declared order in the PRIMARY KEY")); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Order by is currently only supported on the clustered columns of the PRIMARY KEY, got %s", column)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Order by on unknown column %s", column)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("PRIMARY KEY part %s cannot be restricted (preceding part %s is either not restricted or by a non-EQ relation)", cname, previous)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("PRIMARY KEY part %s cannot be restricted by IN relation", cname)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Partition KEY part %s cannot be restricted by IN relation (only the last part of the partition key can)", cname)); 
+  cassandra-1.2.1 => cassandra-2.0.1: (String.format("Partition key part %s must be restricted since preceding part is", cname)); 
+  cassandra-1.2.7 => cassandra-2.0.1: (String.format("Predicates on the non-primary-key column (%s) of a COMPACT table are not yet supported", name.name)); 
+  cassandra-1.2.0 => cassandra-1.2.6: (String.format("Restricting the value of a compact CF (%s) is not supported", name.name)); 
+  cassandra-2.0.1 => cassandra-2.0.1: (String.format("SELECT DISTINCT queries must only request partition key columns (not %s)", name)); 
+  cassandra-2.0.1 => cassandra-2.0.1: (String.format("SELECT DISTINCT queries must request all the partition key columns (missing %s)", name)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("The token() function is only supported on the partition key, found on %s", name)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("The token() function must be applied to all partition key components or none of them")); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Undefined name %s in selection clause", t.id())); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Undefined name %s in where clause ('%s')", rel.getEntity(), rel)); 
+  cassandra-1.2.3 => cassandra-2.0.1: (String.format("Unsupported null value for indexed column %s", name)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Unsupported order by relation")); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("partition key part %s cannot be restricted (preceding part %s is either not restricted or by a non-EQ relation)", cname, previous)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/Selection.java
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Cannot use selection function %s on PRIMARY KEY part %s", tot.isWritetime ? "writeTime" : "ttl", name)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Cannot use selection function %s on collections", tot.isWritetime ? "writeTime" : "ttl")); 
+  cassandra-1.2.2 => cassandra-1.2.10: (String.format("Undefined name %s in selection clause", raw)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Undefined name %s in selection clause", raw.selectable)); 
+  cassandra-1.2.2 => cassandra-1.2.10: (String.format("Undefined name %s in selection clause", rawSelector)); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Undefined name %s in selection clause", rawSelector.selectable)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Undefined name %s in selection clause", tot.id)); 
+  cassandra-1.2.2 => cassandra-2.0.1: (String.format("Unknown function %s called in selection clause", fun.functionName)); 
+  cassandra-1.2.4 => cassandra-2.0.1: (String.format("Unknown function '%s'", withFun.functionName)); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/cql3/statements/UpdateStatement.java
+  cassandra-1.2.0 => cassandra-1.2.1: ("Cannot apply collection operation on column " + name + " with " + name.type + " type."); 
+  cassandra-1.2.0 => cassandra-1.2.10: ("IN is only supported on the last column of the partition key"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("INSERT statement are not allowed on counter tables, use UPDATE instead"); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("Invalid counter operation on non-counter table."); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("Invalid non-counter operation on counter table."); 
+  cassandra-1.2.2 => cassandra-2.0.1: ("No columns provided to INSERT"); 
+  cassandra-1.2.2 => cassandra-2.0.1: ("Unmatched column names/values"); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("no columns specified for INSERT"); 
+  cassandra-1.2.0 => cassandra-1.2.1: ("unmatched column names/values"); 
+  cassandra-1.2.6 => cassandra-2.0.1: (String.format("Column %s is mandatory for this COMPACT STORAGE table", cfDef.value)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Invalid definition for %s, not a collection type", name)); 
+  cassandra-1.2.3 => cassandra-1.2.10: (String.format("Invalid null value for clustering key part %s", name)); 
+  cassandra-1.2.3 => cassandra-1.2.10: (String.format("Invalid null value for partition key part %s", name)); 
+  cassandra-1.2.2 => cassandra-1.2.10: (String.format("Invalid operator %s for PRIMARY KEY part %s", rel.operator(), name)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("Invalid operator %s for key %s", rel.operator(), rel.getEntity())); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Missing PRIMARY KEY part %s since %s is set", firstEmpty.name, name.name)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Missing PRIMARY KEY part %s", cfDef.columns.values().iterator().next())); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Missing mandatory PRIMARY KEY part %s", name)); 
+  cassandra-1.2.0 => cassandra-1.2.5: (String.format("Missing mandatory column %s", cfDef.value)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Multiple definitions found for PRIMARY KEY part %s", name)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Multiple definitions found for column %s", name)); 
+  cassandra-1.2.2 => cassandra-1.2.10: (String.format("Non PRIMARY KEY %s found in where clause", name)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("PRIMARY KEY part %s found in SET part", entry.left)); 
+  cassandra-1.2.0 => cassandra-1.2.1: (String.format("PRIMARY KEY part %s found in SET part", rel.getEntity())); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Unknown identifier %s", columnNames.get(i))); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Unknown identifier %s", entry.left)); 
+  cassandra-1.2.0 => cassandra-1.2.10: (String.format("Unknown key identifier %s", rel.getEntity())); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/db/ConsistencyLevel.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("ANY ConsistencyLevel is only supported for writes"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Consistency level ANY is not yet supported for counter columnfamily " + metadata.cfName); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Counter operations are inherently non-serializable"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("EACH_QUORUM ConsistencyLevel is only supported for writes"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Invalid consistency for conditional update. Must be one of SERIAL or LOCAL_SERIAL"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("You must use conditional updates for serializable writes"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("cannot achieve CL > CL.ONE without replicate_on_write on columnfamily " + metadata.cfName); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("consistency level %s not compatible with replication strategy (%s)", this, strategy.getClass().getName())); 
+  cassandra-2.0.0 => cassandra-2.0.1: (this + " is not supported as conditional update commit consistency. Use ANY if you mean \"make sure it is accepted but I don't care how many replicas commit it for non-SERIAL reads\""); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/service/ClientState.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("Keyspace '" + ks + "' does not exist"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("You have not set a keyspace for this session"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("no keyspace has been specified"); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Provided version %s is not supported by this server (supported: %s)", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("There has been a few syntax breaking changes between 3.0.0-beta1 and 3.0.0 " 
+  cassandra-1.2.0 => cassandra-2.0.1: (e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/service/StorageProxy.java
+  cassandra-2.0.0 => cassandra-2.0.1: ("SERIAL/LOCAL_SERIAL consistency may only be requested for one row at a time"); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/service/StorageService.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("There is no ring for the keyspace: " + keyspace); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/thrift/CassandraServer.java
+  cassandra-1.2.1 => cassandra-2.0.1: ( 
+  cassandra-2.0.0 => cassandra-2.0.1: ("CAS does not support supercolumns"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("CfDef (" + cf.getName() +") had a keyspace definition that did not match KsDef"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Could not find column family definition to modify."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Counter mutations are not allowed in atomic batches"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Cross-row paging is not supported along with index clauses"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Error deflating query string."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Keyspace and CF name must be set."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Keyspace update must not contain any column family definitions."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Unknown query string encoding."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("missing mandatory super column name for super CF " + column_parent.column_family); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Prepared query with ID %d not found" + 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Prepared query with ID %d not found", itemId)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (e.getMessage()); 
+  cassandra-1.2.0 => cassandra-2.0.1: (ex.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/thrift/ThriftConversion.java
+  cassandra-1.2.0 => cassandra-2.0.1: return new InvalidRequestException(e.getMessage()); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/thrift/ThriftValidation.java
+  cassandra-1.2.0 => cassandra-2.0.1: ("A SlicePredicate must be given a list of Columns, a SliceRange, or both"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("A column cannot be specified without specifying a super column for removal on super CF " 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Column timestamp is required"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Column value is required"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("ColumnOrSuperColumn must have one (and only one) of column, super_column, counter and counter_super_column"); 
+  cassandra-1.2.0 => cassandra-1.2.10: ("Deletion does not yet support SliceRange predicates."); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Deletion timestamp is not optional for non commutative column family " + metadata.cfName); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Index expression values may not be larger than 64K"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Key length of " + key.remaining() + 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Key may not be empty"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("No indexed columns present in index clause with operator EQ"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("Start key's token sorts after end token"); 
+  cassandra-1.2.0 => cassandra-1.2.0: ("Start token sorts after end token"); 
+  cassandra-1.2.0 => cassandra-1.2.10: ("column name length must not be greater than " + IColumn.MAX_NAME_LENGTH); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("column name length must not be greater than " + maxNameLength); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("column name must not be empty"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("column parameter is not optional for standard CF " + metadata.cfName); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("columnfamily alone is required for standard CF " + metadata.cfName); 
+  cassandra-1.2.1 => cassandra-2.0.1: ("exactly one each of {start key, start token} and {end key, end token} must be specified"); 
+  cassandra-1.2.0 => cassandra-1.2.0: ("exactly one of {start key, end key} or {start token, end token} must be specified"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("get_slice requires non-negative count"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("index clause list may not be empty"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("invalid operation for commutative columnfamily " + cfName); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("invalid operation for commutative columnfamily " + metadata.cfName); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("invalid operation for non commutative columnfamily " + cfName); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("invalid operation for non commutative columnfamily " + metadata.cfName); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("maxRows must be positive"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("mutation must have one and only one of column_or_supercolumn or deletion"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("non-empty columnfamily is required"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("predicate column_names and slice_range may not both be null"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("predicate column_names and slice_range may not both be present"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("range finish must come after start in the order of traversal"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("start key must sort before (or equal to) finish key in your partitioner!"); 
+  cassandra-1.2.0 => cassandra-1.2.0: ("start key's md5 sorts after end key's md5.  this is not allowed; you probably should not specify end key at all, under RandomPartitioner"); 
+  cassandra-1.2.1 => cassandra-2.0.1: ("start key's token sorts after end key's token.  this is not allowed; you probably should not specify end key at all except with an ordered partitioner"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("start token + end key is not a supported key range"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("super columns are not supported for indexing"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("supercolumn may not be specified for standard CF " + metadata.cfName); 
+  cassandra-1.2.0 => cassandra-1.2.10: ("supercolumn name length must not be greater than " + IColumn.MAX_NAME_LENGTH); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("supercolumn name length must not be greater than " + maxNameLength); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("supercolumn name must not be empty"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("supercolumn parameter is invalid for standard CF " + metadata.cfName); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("supercolumn parameter is not optional for super CF " + metadata.cfName); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("supercolumn specified to ColumnFamily " + metadata.cfName + " containing normal columns"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("system keyspace is not user-modifiable"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("ttl must be positive"); 
+  cassandra-1.2.0 => cassandra-2.0.1: ("unconfigured columnfamily " + cfName); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("(%s) [%s][%s][%s] failed validation", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Can't index column value of size %d for index %s in CF %s of KS %s", 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Invalid cell for CQL3 table %s. The CQL3 column component (%s) does not correspond to a defined CQL3 column", 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Invalid collection component, %s is not a collection", UTF8Type.instance.getString(CQL3ColumnName))); 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("Keyspace names must be case-insensitively unique (\"%s\" conflicts with \"%s\")", 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("Not enough components (found %d but %d expected) for column name since %s is a CQL3 table", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("[%s]=[%s] failed name validation (%s)", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("[%s]=[%s] failed value validation (%s)", 
+  cassandra-1.2.0 => cassandra-2.0.1: (String.format("ttl is too large. requested (%d) maximum (%d)", column.ttl, ExpiringColumn.MAX_TTL)); 
+  cassandra-1.2.0 => cassandra-2.0.1: (e.getMessage()); 
+  cassandra-1.2.0 => cassandra-2.0.1: (msg); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/transport/messages/BatchMessage.java
+  cassandra-2.0.0 => cassandra-2.0.1: ("Cannot include counter statement in a non-counter batch"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Cannot include non-counter statement in a counter batch"); 
+  cassandra-2.0.0 => cassandra-2.0.1: ("Invalid statement in batch: only UPDATE, INSERT and DELETE statements are allowed."); 
+  cassandra-2.0.0 => cassandra-2.0.1: (String.format("There were %d markers(?) in CQL but %d bound variables", 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/transport/messages/ErrorMessage.java
+  cassandra-1.2.0 => cassandra-2.0.1: te = new InvalidRequestException(msg); 
+/Users/jcwu/repos/cassandra/src/java/org/apache/cassandra/triggers/TriggerExecutor.java
+  cassandra-2.0.0 => cassandra-2.0.1: ("Counter mutations and trigger mutations cannot be applied together atomically."); 
