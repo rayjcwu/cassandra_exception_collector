@@ -8,7 +8,17 @@ import difflib
 
 PROJECT_ROOT = "/Users/jcwu/repos/cassandra"
 
+class ExceptionInfo:
+  def __init__(self, filename, message, version, version_idx):
+    self.filename = filename
+    self.message = message
+    self.version = version
+    self.version_idx = version_idx
+
 def get_checkout_list(filename):
+  """
+  Return a list of versions (tags or branches) to checkout
+  """
   f = open(filename)
   result = []
   for line in f.readlines():
@@ -20,6 +30,9 @@ def get_checkout_list(filename):
 
 
 def parse_result(string):
+  """
+  Return filename and exception from this grep output result
+  """
   idx = string.find(":")
   filename = string[:idx]
   exception = string[idx + 1:].replace("throw new InvalidRequestException", "")\
@@ -27,8 +40,19 @@ def parse_result(string):
                               .strip()
   return (filename, exception)
 
+def collect_exception(**kwargs):
+  """
+  Collect all exception information, store as a list of ExceptionInfo
+  """
 
-def collect_exception(path, exception_string='new\ .*InvalidRequestException'):
+  exception_string='new\ .*InvalidRequestException'
+  if 'exception_string' in kwargs:
+    exception_string = kwargs['exception_string']
+
+  path = kwargs['path']
+  version = kwargs['version']
+  version_idx = kwargs['version_idx']
+
   result = subprocess.check_output(["grep", "-r", exception_string, path])
   set_dict = defaultdict(set)
   for line in result.splitlines():
@@ -38,6 +62,9 @@ def collect_exception(path, exception_string='new\ .*InvalidRequestException'):
   return set_dict
 
 def checkout(to_checkout):
+  """
+  Checkout to particular versoin
+  """
   print "checkout to ", to_checkout
   subprocess.call(["git", "checkout", to_checkout])
 
@@ -83,9 +110,13 @@ if __name__ == '__main__':
   os.chdir(PROJECT_ROOT)
   exception_map = {}
 
-  for to_checkout in checkout_list:
+  # for to_checkout in checkout_list:
+  for to_checkout_idx in range(len(checkout_list)):
+    to_checkout = checkout_list[to_checkout_idx]
     checkout(to_checkout)
-    exception_digest = collect_exception(os.path.join(PROJECT_ROOT, "src"))
+    exception_digest = collect_exception(path=os.path.join(PROJECT_ROOT, "src"),
+                                         version=to_checkout,
+                                         version_idx=to_checkout_idx)
     exception_map[to_checkout] = exception_digest
 
   for i in range(len(checkout_list) - 1):
