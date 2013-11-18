@@ -8,6 +8,27 @@ import difflib
 
 PROJECT_ROOT = "/Users/jcwu/repos/cassandra"
 
+class Range:
+  def __init__(self, version, version_idx):
+    self.start_version_idx = version_idx
+    self.start_version = version
+    self.end_version_idx = version_idx
+    self.end_version = version
+
+  def update(self, version, version_idx):
+    if version_idx < self.start_version_idx:
+      self.start_version = version
+      self.start_version_idx = version_idx
+
+    if version_idx > self.end_version_idx:
+      self.end_version = version
+      self.end_version_idx = version_idx
+
+  def __str__(self):
+    return "%s => %s" % (self.start_version, self.end_version)
+
+  __repr__ = __str__
+
 class ExceptionInfo:
   def __init__(self, filename, message, version, version_idx):
     self.filename = filename
@@ -18,8 +39,7 @@ class ExceptionInfo:
   def __str__(self):
     return "%s %s %s" % (self.filename, self.message, self.version)
 
-  def __repr__(self):
-    return self.__str__()
+  __repr__ = __str__
 
 def get_checkout_list(filename):
   """
@@ -129,6 +149,35 @@ def group_by_version(exception_info_list):
 
   return by_ver
 
+def print_version_evolution(exception_info_list):
+  # group_by_version
+  by_version = group_by_version(exception_info_list)
+  for i in range(len(checkout_list) - 1):
+    print ""
+    print "=== %s -> %s ===" % (checkout_list[i], checkout_list[i + 1])
+    from_digest = by_version[checkout_list[i]]
+    to_digest = by_version[checkout_list[i + 1]]
+    compare_digest(from_digest, to_digest)
+
+def print_exception_range(exception_info_list):
+  """
+  @type exception_info_list: list [ExceptionInfo]
+  """
+  range_dict = {}
+  for e in exception_info_list:
+    dict_key = (e.filename, e.message)
+    if dict_key in range_dict:
+      range_dict[dict_key].update(e.version, e.version_idx)
+    else:
+      range_dict[dict_key] = Range(e.version, e.version_idx)
+
+  filename = ""
+  for k in sorted(list(range_dict.keys())):
+    if k[0] != filename:
+      filename = k[0]
+      print filename
+
+    print "  %s: %s " % (range_dict[k], k[1])
 
 if __name__ == '__main__':
   checkout_list = get_checkout_list("list_to_checkout.txt")
@@ -144,13 +193,5 @@ if __name__ == '__main__':
                                          version_idx=to_checkout_idx)
     exception_info_list.extend(exception_digest)
 
-  # group_by_version
-  by_version = group_by_version(exception_info_list)
-  # print exception_info_list
-
-  for i in range(len(checkout_list) - 1):
-    print ""
-    print "=== %s -> %s ===" % (checkout_list[i], checkout_list[i+1])
-    from_digest = by_version[checkout_list[i]]
-    to_digest = by_version[checkout_list[i+1]]
-    compare_digest(from_digest, to_digest)
+  # print_version_evolution(exception_info_list)
+  print_exception_range(exception_info_list)
