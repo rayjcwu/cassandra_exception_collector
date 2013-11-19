@@ -9,8 +9,6 @@ import hashlib
 import sqlite3
 import argparse
 
-
-
 class Range:
   def __init__(self, version, version_idx):
     self.start_version_idx = version_idx
@@ -394,8 +392,8 @@ if __name__ == '__main__':
                                          version_idx=to_checkout_idx)
       exception_info_list.extend(exception_digest)
 
-    # print_version_evolution(exception_info_list)
-    # print_exception_range(exception_info_list)
+    print_version_evolution(exception_info_list)
+    print_exception_range(exception_info_list)
 
     store_sqlite3(absolute_database_path, exception_info_list)
   except Exception, e:
