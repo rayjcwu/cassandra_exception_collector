@@ -6,6 +6,8 @@ from collections import defaultdict
 import difflib
 import hashlib
 
+import mygrep
+
 import sqlite3
 import argparse
 
@@ -55,35 +57,16 @@ def get_checkout_list(filename):
     result.append(line)
   return result
 
-
-def parse_result(string):
-  """
-  Return filename and exception from this grep output result
-  """
-  idx = string.find(":")
-  filename = string[:idx]
-  message = string[idx + 1:].replace("throw new InvalidRequestException", "")\
-                              .replace("throw new org.apache.cassandra.exceptions.InvalidRequestException", "")\
-                              .strip()
-  return (filename, message)
-
 def collect_exception(**kwargs):
   """
   Collect all exception information, store as a list of ExceptionInfo
   """
-
-  exception_string='new\ .*InvalidRequestException'
-  if 'exception_string' in kwargs:
-    exception_string = kwargs['exception_string']
-
   path = kwargs['path']
   version = kwargs['version']
   version_idx = kwargs['version_idx']
 
-  result = subprocess.check_output(["grep", "-r", exception_string, path])
   exception_info_list = []
-  for line in result.splitlines():
-    (filename, message) = parse_result(line)
+  for filename, message in mygrep.mygrep(path):
     if filename != "":
       exception_info_list.append(ExceptionInfo(filename, message, version, version_idx))
   return exception_info_list
