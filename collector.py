@@ -5,11 +5,10 @@ import subprocess
 from collections import defaultdict
 import difflib
 import hashlib
-
-import mygrep
-
 import sqlite3
 import argparse
+import mygrep
+
 
 class Range:
   def __init__(self, version, version_idx):
@@ -44,6 +43,7 @@ class ExceptionInfo:
 
   __repr__ = __str__
 
+
 def get_checkout_list(filename):
   """
   Return a list of versions (tags or branches) to checkout
@@ -56,6 +56,7 @@ def get_checkout_list(filename):
       continue
     result.append(line)
   return result
+
 
 def collect_exception(**kwargs):
   """
@@ -71,12 +72,14 @@ def collect_exception(**kwargs):
       exception_info_list.append(ExceptionInfo(filename, message, version, version_idx))
   return exception_info_list
 
+
 def checkout(to_checkout):
   """
   Checkout to particular versoin
   """
   print "checkout to ", to_checkout
   subprocess.call(["git", "checkout", to_checkout])
+
 
 def compare_digest(from_digest, to_digest):
 
@@ -115,6 +118,7 @@ def compare_digest(from_digest, to_digest):
           file_printed = True
         print d
 
+
 def group_by_version(exception_info_list):
   """
   @type exception_info_list: list [ExceptionInfo]
@@ -133,6 +137,7 @@ def group_by_version(exception_info_list):
 
   return by_ver
 
+
 def print_version_evolution(exception_info_list):
   # group_by_version
   by_version = group_by_version(exception_info_list)
@@ -142,6 +147,7 @@ def print_version_evolution(exception_info_list):
     from_digest = by_version[checkout_list[i]]
     to_digest = by_version[checkout_list[i + 1]]
     compare_digest(from_digest, to_digest)
+
 
 def print_exception_range(exception_info_list):
   """
@@ -163,14 +169,17 @@ def print_exception_range(exception_info_list):
 
     print "  %s: %s " % (range_dict[k], k[1])
 
+
 def hash_tuple(iterable):
   h = hashlib.sha1()
   for t in iterable:
     h.update(t)
   return h.hexdigest()
 
+
 def remove_prefix(filename, prefix):
   return filename.replace(prefix, "")
+
 
 def store_raw(**kwargs):
   con=kwargs['con']
@@ -220,6 +229,7 @@ def store_raw(**kwargs):
                   VALUES(?, ?, ?, ?, ?);
                   """, raw_insert)
   con.commit()
+
 
 def get_exception_id(**kwargs):
   con         = kwargs['con']
@@ -296,6 +306,7 @@ def get_exception_id(**kwargs):
     con.commit()
     return exception_idx
 
+
 def update_exception_idx(**kwargs):
   con = kwargs['con']
   cur = kwargs['cur']
@@ -325,6 +336,7 @@ def update_exception_idx(**kwargs):
 
   con.commit()
 
+
 def store_sqlite3(absolute_database_path, exception_info_list):
   """
   @type exception_info_list: list [ExceptionInfo]
@@ -351,6 +363,7 @@ def store_sqlite3(absolute_database_path, exception_info_list):
     if con:
       con.close()
 
+
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument("-s", "--srcpath", help="absolute root path of Cassandra source code", default="/Users/jcwu/repos/cassandra")
@@ -371,8 +384,8 @@ if __name__ == '__main__':
       to_checkout = checkout_list[to_checkout_idx]
       checkout(to_checkout)
       exception_digest = collect_exception(path=os.path.join(project_root, "src"),
-                                         version=to_checkout,
-                                         version_idx=to_checkout_idx)
+                                           version=to_checkout,
+                                           version_idx=to_checkout_idx)
       exception_info_list.extend(exception_digest)
 
     print_version_evolution(exception_info_list)
