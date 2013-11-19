@@ -2,7 +2,7 @@
 
 import os
 import subprocess
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import difflib
 import hashlib
 import sqlite3
@@ -66,10 +66,12 @@ def collect_exception(**kwargs):
   version = kwargs['version']
   version_idx = kwargs['version_idx']
 
+  path_prefix = os.path.join(path, "java") + os.sep
+
   exception_info_list = []
   for filename, message in mygrep.mygrep(path):
     if filename != "":
-      exception_info_list.append(ExceptionInfo(filename, message, version, version_idx))
+      exception_info_list.append(ExceptionInfo(filename.replace(path_prefix, ""), message, version, version_idx))
   return exception_info_list
 
 
@@ -77,7 +79,7 @@ def checkout(to_checkout):
   """
   Checkout to particular versoin
   """
-  print "checkout to ", to_checkout
+  # print "checkout to ", to_checkout
   subprocess.call(["git", "checkout", to_checkout])
 
 
@@ -177,16 +179,15 @@ def hash_tuple(iterable):
   return h.hexdigest()
 
 
-def remove_prefix(filename, prefix):
-  return filename.replace(prefix, "")
-
-
 def store_raw(**kwargs):
   con=kwargs['con']
   cur=kwargs['cur']
   exception_info_list=kwargs['exception_info_list']
-  path_prefix=kwargs['path_prefix']
 
+  cur.execute("DROP TABLE IF EXISTS raw_exception_info;")
+  con.commit()
+  cur.execute("DROP TABLE IF EXISTS exception_info;")
+  con.commit()
   cur.execute("""
               CREATE TABLE IF NOT EXISTS exception_info (
                 exception_idx INT PRIMARY KEY,
@@ -199,7 +200,6 @@ def store_raw(**kwargs):
               );
               """)
   con.commit()
-
   cur.execute("""
               CREATE TABLE IF NOT EXISTS raw_exception_info (
                 hash_idx TEXT,
@@ -213,14 +213,12 @@ def store_raw(**kwargs):
               """)
   con.commit()
 
-  cur.execute("DELETE FROM raw_exception_info;")  # to avoid duplicate insertion
-  con.commit()
 
   raw_insert = [
-        (hash_tuple((remove_prefix(e.filename, path_prefix), e.version, e.message)),  # hash_idx
-         remove_prefix(filename=e.filename, prefix=path_prefix),                      # filename
-         e.version_idx,                                                               # version_idx
-         e.version,                                                                   # version
+        (hash_tuple((e.filename, e.version, e.message)),  # hash_idx
+         e.filename,                                    # filename
+         e.version_idx,                                 # version_idx
+         e.version,                                     # version
          e.message)
         for e in exception_info_list]
 
@@ -231,111 +229,56 @@ def store_raw(**kwargs):
   con.commit()
 
 
-def get_exception_id(**kwargs):
-  con         = kwargs['con']
-  cur         = kwargs['cur']
-  version_idx = kwargs['version_idx']
-  version     = kwargs['version']
-  filename    = kwargs['filename']
-  message     = kwargs['message']
+def build_version_range(exception_info_list):
+  """
+  @type exception_info_list: list [ExceptionInfo]
+  """
+  od = OrderedDict()
 
-  cur.execute("""
-              SELECT exception_idx,
-                     start_version_idx,
-                     start_version,
-                     end_version_idx,
-                     end_version
-              FROM exception_info
-              WHERE filename = ?
-              AND message = ?;
-              """, (filename, message))
-  r = cur.fetchall()
-  if len(r) == 0:
-    cur.execute("""
-                INSERT INTO exception_info (
-                    exception_idx,
-                    filename,
-                    message,
-                    start_version_idx,
-                    start_version,
-                    end_version_idx,
-                    end_version)
-                VALUES (last_insert_rowid() + 1, ?, ?, ?, ?, ?, ?);
-                """, (filename, message, version_idx, version, version_idx, version))
-    con.commit()
-    cur.execute("""
-              SELECT exception_idx
-              FROM exception_info
-              WHERE filename = ?
-              AND message = ?;
-              """, (filename, message))
+  for e in exception_info_list:
+    key = (e.filename, e.message)
 
-    rr = cur.fetchone()
-    return rr[0]
-  else:
-    # update version range
-    exception_idx     = r[0][0]
-    start_version_idx = r[0][1]
-    start_version     = r[0][2]
-    end_version_idx   = r[0][3]
-    end_version       = r[0][4]
+    if key in od:
+      od.get(key).update(e.version, e.version_idx)
+    else:
+      od[key] = Range(e.version, e.version_idx)
 
-    # print r
-
-    if version_idx < start_version_idx:
-      start_version_idx = version_idx
-      start_version = version
-
-    if version_idx > end_version_idx:
-      end_version_idx = version_idx
-      end_version = version
-
-    # print end_version_idx, end_version
-    cur.execute("""
-                UPDATE exception_info
-                SET start_version_idx = ?,
-                    start_version     = ?,
-                    end_version_idx   = ?,
-                    end_version       = ?
-                WHERE exception_idx   = ?;
-                """, (start_version_idx,
-                      start_version,
-                      end_version_idx,
-                      end_version,
-                      exception_idx))
-    con.commit()
-    return exception_idx
+  return od
 
 
-def update_exception_idx(**kwargs):
+def store_version_range(**kwargs):
   con = kwargs['con']
   cur = kwargs['cur']
+  exception_info_list = kwargs['exception_info_list']
+  version_range_map = kwargs['version_range_map']
 
-  cur.execute("""
-              SELECT hash_idx, filename, version_idx, version, message
-              FROM raw_exception_info
-              ORDER BY version_idx, filename, message;
-              """)
-  for result in cur.fetchall():
-    hash_idx    = result[0]
-    filename    = result[1]
-    version_idx = result[2]
-    version     = result[3]
-    message     = result[4]
+  exception_idx_map = {}
+  i = 0
+  for key, value in version_range_map.items():
+    i += 1
+    exception_idx_map[key] = i
 
-    e_idx = get_exception_id(con=con, cur=cur,
-                             version_idx=version_idx,
-                             version=version,
-                             filename=filename,
-                             message=message)
-    cur.execute("""
-                UPDATE raw_exception_info
-                SET exception_idx = ?
-                WHERE hash_idx = ?;
-                """, (e_idx, hash_idx))
+  exception_info_batch = [
+    (exception_idx_map[k],  # exception_idx
+     k[0],                  # filename
+     k[1],                  # message
+     v.start_version_idx,
+     v.start_version,
+     v.end_version_idx,
+     v.end_version)
+    for k, v in version_range_map.items()]
 
+  cur.executemany("""
+                  INSERT INTO exception_info
+                  (exception_idx,
+                   filename,
+                   message,
+                   start_version_idx,
+                   start_version,
+                   end_version_idx,
+                   end_version) VALUES (?, ?, ?, ?, ?, ?, ?);
+                  """, exception_info_batch)
   con.commit()
-
 
 def store_sqlite3(absolute_database_path, exception_info_list):
   """
@@ -343,16 +286,16 @@ def store_sqlite3(absolute_database_path, exception_info_list):
   """
   con = None
   cur = None
-  filename_prefix = os.path.join(os.path.join(os.getcwd(), 'src'), 'java') + os.sep
-  print "source code root path:", filename_prefix
 
   try:
     con = sqlite3.connect(absolute_database_path)
     cur = con.cursor()
 
     # store raw exception info
-    store_raw(con=con, cur=cur, exception_info_list=exception_info_list, path_prefix=filename_prefix)
-    update_exception_idx(con=con, cur=cur)
+    store_raw(con=con, cur=cur, exception_info_list=exception_info_list)
+    filename_message_version_range_map = build_version_range(exception_info_list)
+    store_version_range(con=con, cur=cur, exception_info_list=exception_info_list, version_range_map=filename_message_version_range_map)
+    # update_exception_idx(con=con, cur=cur)
 
   except sqlite3.Error, e:
     print "Sqlite3 Error %s" % e.args[0]
