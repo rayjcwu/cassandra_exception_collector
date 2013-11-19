@@ -7,8 +7,9 @@ import difflib
 import hashlib
 
 import sqlite3
+import argparse
 
-PROJECT_ROOT = "/Users/jcwu/repos/cassandra"
+
 
 class Range:
   def __init__(self, version, version_idx):
@@ -369,23 +370,34 @@ def store_sqlite3(absolute_database_path, exception_info_list):
     if con:
       con.close()
 
-
 if __name__ == '__main__':
-  checkout_list = get_checkout_list("list_to_checkout.txt")
-  absolute_database_path = os.path.join(os.getcwd(), 'exceptions.db')
-  os.chdir(PROJECT_ROOT)
-  exception_map = {}
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-s", "--srcpath", help="absolute root path of Cassandra source code", default="/Users/jcwu/repos/cassandra")
+  parser.add_argument("-l", "--listfile", help="list of versions to checkout", default="list_to_checkout.txt")
 
-  exception_info_list = []
-  for to_checkout_idx in range(len(checkout_list)):
-    to_checkout = checkout_list[to_checkout_idx]
-    checkout(to_checkout)
-    exception_digest = collect_exception(path=os.path.join(PROJECT_ROOT, "src"),
+  args = parser.parse_args()
+
+  try:
+    checkout_list = get_checkout_list(args.listfile)
+    absolute_database_path = os.path.join(os.getcwd(), 'exceptions.db')
+
+    project_root = args.srcpath
+    os.chdir(project_root)
+    exception_map = {}
+
+    exception_info_list = []
+    for to_checkout_idx in range(len(checkout_list)):
+      to_checkout = checkout_list[to_checkout_idx]
+      checkout(to_checkout)
+      exception_digest = collect_exception(path=os.path.join(project_root, "src"),
                                          version=to_checkout,
                                          version_idx=to_checkout_idx)
-    exception_info_list.extend(exception_digest)
+      exception_info_list.extend(exception_digest)
 
-  # print_version_evolution(exception_info_list)
-  # print_exception_range(exception_info_list)
+    # print_version_evolution(exception_info_list)
+    # print_exception_range(exception_info_list)
 
-  store_sqlite3(absolute_database_path, exception_info_list)
+    store_sqlite3(absolute_database_path, exception_info_list)
+  except Exception, e:
+    print e.message
+    parser.print_help()
