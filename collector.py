@@ -167,6 +167,7 @@ def print_exception_range(exception_info_list):
   for k in sorted(list(range_dict.keys())):
     if k[0] != filename:
       filename = k[0]
+      print ""
       print filename
 
     print "  %s: %s " % (range_dict[k], k[1])
@@ -179,10 +180,9 @@ def hash_tuple(iterable):
   return h.hexdigest()
 
 
-def store_raw(**kwargs):
+def reset_tables(**kwargs):
   con=kwargs['con']
   cur=kwargs['cur']
-  exception_info_list=kwargs['exception_info_list']
 
   cur.execute("DROP TABLE IF EXISTS raw_exception_info;")
   con.commit()
@@ -213,6 +213,11 @@ def store_raw(**kwargs):
               """)
   con.commit()
 
+
+def store_raw(**kwargs):
+  con=kwargs['con']
+  cur=kwargs['cur']
+  exception_info_list=kwargs['exception_info_list']
 
   raw_insert = [
         (hash_tuple((e.filename, e.version, e.message)),  # hash_idx
@@ -249,8 +254,10 @@ def build_version_range(exception_info_list):
 def store_version_range(**kwargs):
   con = kwargs['con']
   cur = kwargs['cur']
-  exception_info_list = kwargs['exception_info_list']
   version_range_map = kwargs['version_range_map']
+  """
+  @type version_range_map: dict[(filename, message), Range]
+  """
 
   exception_idx_map = {}
   i = 0
@@ -280,6 +287,14 @@ def store_version_range(**kwargs):
                   """, exception_info_batch)
   con.commit()
 
+  raw_exception_info_label = [(v, k[0], k[1]) for k, v in exception_idx_map.items()]
+  cur.executemany("""
+                  UPDATE raw_exception_info
+                  SET exception_idx = ?
+                  WHERE filename = ? AND message = ?;
+                  """, raw_exception_info_label)
+  con.commit()
+
 def store_sqlite3(absolute_database_path, exception_info_list):
   """
   @type exception_info_list: list [ExceptionInfo]
@@ -291,11 +306,10 @@ def store_sqlite3(absolute_database_path, exception_info_list):
     con = sqlite3.connect(absolute_database_path)
     cur = con.cursor()
 
-    # store raw exception info
+    reset_tables(con=con, cur=cur)
     store_raw(con=con, cur=cur, exception_info_list=exception_info_list)
     filename_message_version_range_map = build_version_range(exception_info_list)
-    store_version_range(con=con, cur=cur, exception_info_list=exception_info_list, version_range_map=filename_message_version_range_map)
-    # update_exception_idx(con=con, cur=cur)
+    store_version_range(con=con, cur=cur, version_range_map=filename_message_version_range_map)
 
   except sqlite3.Error, e:
     print "Sqlite3 Error %s" % e.args[0]

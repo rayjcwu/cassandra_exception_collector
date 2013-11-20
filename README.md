@@ -1,10 +1,11 @@
 cassandra_exception_collector
 =============================
 
-This script uses `git` and `grep` to collect all `InvalidRequestException` and their status in cassandra source code.
+This script uses `git` to collect all `InvalidRequestException` and their message in cassandra source code.
 
-Need to edit `PROJECT_ROOT` in `collector.py` to point to the path containing cassandra source code.
+Use `-s` option to specify the root path of Casssandra.
 
 Edit `list_to_checkout.txt` to add tags/branches you are interested in.
 
-You could find a sample output in `output.txt`.
+It will output exceptions delta history and range information to console and store range information to sqlite database `exceptions.db`.
+Check `output.txt` to see how the output looks like.
