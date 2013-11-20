@@ -1,0 +1,13 @@
+# put hash_idxs you want to merge in the same line, separated by space
+# if multiple raw_exception_info belong to the same exception_idx, 
+# you only need to choose one of them to merge with others
+# after merge, those_exception_info will point to the latest exception_idx
+#
+# for example, 
+#  ("You must specify one and only one PRIMARY KEY"); in CreateColumnFamilyStatement.java exists since cassandra-1.2.0 to cassandra-1.2.10.   - (1)
+#  in cassandra-2.0.0, the file is renamed to CreateTableStatement.java                                                                       - (2)
+#  in cassandra-2.0.1, the error message is changed to ("No PRIMARY KEY specified (exactly one required)");                                   - (3)
+# collector.py will group exceptions by filename and message, so there will be 3 different exceptions in exception_idx.
+# however, in raw_exception_info, hash for each row is calculate by (filename, message, version), so every row in group (1) has different hash_idx
+# to merge these three groups, you only need to choose one hash_idx from each group as representative
+f3e6b8595b665a81666037ecedd1d00726da6c35 09ea14148c4b598a1a8bfc3f92dbf3881caee0b2 26504c151e7eba36d3fec05c5f455b70db47c7de

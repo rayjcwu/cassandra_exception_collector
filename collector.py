@@ -196,7 +196,8 @@ def reset_tables(**kwargs):
                 start_version_idx INT,
                 start_version TEXT,
                 end_version_idx INT,
-                end_version TEXT
+                end_version TEXT,
+                update_idx INT
               );
               """)
   con.commit()
