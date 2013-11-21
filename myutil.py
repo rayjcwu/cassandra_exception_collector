@@ -1,14 +1,15 @@
 import os
 import re
 
+
 def read_file_without_comment(filename):
     """
     read file and return file content line by line as a list
     without comment lines or empty lins
     """
     return [x.strip() for x in open(filename).readlines()
-                     if not x.strip().startswith("#")
-                     and len(x.strip()) != 0]
+            if not x.strip().startswith("#")
+        and len(x.strip()) != 0]
 
 
 def abs_path_collector(path):
@@ -34,8 +35,8 @@ def extract_exception_message(filename):
             while not line.endswith(";"):
                 i += 1
                 line += " " + lines[i].strip()
-            to_insert = line.replace("throw new InvalidRequestException", "")\
-                            .replace("throw new org.apache.cassandra.exceptions.InvalidRequestException", "")
+            to_insert = line.replace("throw new InvalidRequestException", "") \
+                .replace("throw new org.apache.cassandra.exceptions.InvalidRequestException", "")
 
             if to_insert.find('"') >= 0:
                 results.append(to_insert[1:-2]) # strip (  and  );
