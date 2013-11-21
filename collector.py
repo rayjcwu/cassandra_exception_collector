@@ -7,8 +7,8 @@ import difflib
 import hashlib
 import sqlite3
 import argparse
-import mygrep
-
+import myutil
+import re
 
 class Range:
   def __init__(self, version, version_idx):
@@ -44,20 +44,6 @@ class ExceptionInfo:
   __repr__ = __str__
 
 
-def get_checkout_list(filename):
-  """
-  Return a list of versions (tags or branches) to checkout
-  """
-  f = open(filename)
-  result = []
-  for line in f.readlines():
-    line = line.strip()
-    if line.startswith("#"):
-      continue
-    result.append(line)
-  return result
-
-
 def collect_exception(**kwargs):
   """
   Collect all exception information, store as a list of ExceptionInfo
@@ -65,11 +51,12 @@ def collect_exception(**kwargs):
   path = kwargs['path']
   version = kwargs['version']
   version_idx = kwargs['version_idx']
+  exclude_pattern = kwargs['exclude_pattern']
 
   path_prefix = os.path.join(path, "java") + os.sep
 
   exception_info_list = []
-  for filename, message in mygrep.mygrep(path):
+  for filename, message in myutil.mygrep(path, exclude_regex=exclude_pattern):
     if filename != "":
       exception_info_list.append(ExceptionInfo(filename.replace(path_prefix, ""), message, version, version_idx))
   return exception_info_list
@@ -324,13 +311,18 @@ def store_sqlite3(absolute_database_path, exception_info_list):
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument("-s", "--srcpath", help="absolute root path of Cassandra source code", default="/Users/jcwu/repos/cassandra")
+  parser.add_argument("-s", "--srcpath", help="absolute root path of Cassandra source code", default="/home/jcwu/repos/cassandra")
   parser.add_argument("-l", "--listfile", help="list of versions to checkout", default="list_to_checkout.txt")
+  parser.add_argument("-f", "--excludefile", help="list of pattern to be excluded", default="files_to_exclude.txt")
 
   args = parser.parse_args()
 
   try:
-    checkout_list = get_checkout_list(args.listfile)
+    exclude_pattern = None
+    checkout_list = myutil.read_file_without_comment(args.listfile)
+    exclude_list = myutil.read_file_without_comment(args.excludefile)
+    if len(exclude_list) != 0:
+        exclude_pattern = re.compile("|".join(["\\b" + p + "\\b" for p in exclude_list]))
     absolute_database_path = os.path.join(os.getcwd(), 'exceptions.db')
 
     project_root = args.srcpath
@@ -343,7 +335,8 @@ if __name__ == '__main__':
       checkout(to_checkout)
       exception_digest = collect_exception(path=os.path.join(project_root, "src"),
                                            version=to_checkout,
-                                           version_idx=to_checkout_idx)
+                                           version_idx=to_checkout_idx,
+                                           exclude_pattern=exclude_pattern)
       exception_info_list.extend(exception_digest)
 
     print_version_evolution(exception_info_list)

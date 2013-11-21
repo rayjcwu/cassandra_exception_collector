@@ -1,0 +1,18 @@
+#
+# will exclude files matching given string pattern (with whole string)
+# input pattern may be
+#
+#   org/apache/cassandra/thrift/ThriftValidation.java
+#   org/apache/cassandra/cql3/Term.java
+#   org/apache/cassandra/cql/DropIndexStatement
+#   org/apache/cassandra/db/ConsistencyLevel.java
+#
+# put "cql" below will match "/cql/" but not "/cql3/"
+# you can also specify folder with filename like "cql/DropIndexStatement"
+thrift
+cql
+db
+service
+auth
+config
+transport
