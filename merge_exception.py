@@ -12,11 +12,13 @@ def merge_exception_idx(**kwargs):
     @type versions: list[str]
     """
 
+    # find all exception_idx based on hash_idx
+    # in table exception_info, exceptions already groupded by exception message, so their exception_idx will be the same
     exception_idxs = []
     for version in versions:
         cur.execute("SELECT exception_idx FROM raw_exception_info WHERE hash_idx = ?", (version, ))
         r = cur.fetchone()
-        if len(r) == 0:
+        if not r or len(r) == 0:
             print "exceptoin %s doesn't exist" % (version)
             continue
         else:

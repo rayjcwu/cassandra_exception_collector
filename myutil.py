@@ -45,6 +45,13 @@ def extract_exception_message(filename):
 
 
 def mygrep(path, exclude_regex=None):
+    """
+    recursive grep all java file in a given path
+    will skip files if exclude_regex match filename
+
+    @type path: basestring
+    @type exclude_regex: _sre.SRE_Pattern
+    """
     results = []
     for filename in abs_path_collector(path):
         if exclude_regex and exclude_regex.search(filename):

@@ -12,6 +12,9 @@ import re
 
 
 class Range:
+    """
+    a class to store exception range
+    """
     def __init__(self, version, version_idx):
         self.start_version_idx = version_idx
         self.start_version = version
@@ -34,6 +37,9 @@ class Range:
 
 
 class ExceptionInfo:
+    """
+    a class to store exception info
+    """
     def __init__(self, filename, message, version, version_idx):
         self.filename = filename
         self.message = message
@@ -46,7 +52,7 @@ class ExceptionInfo:
     __repr__ = __str__
 
 
-def collect_exception(**kwargs):
+def collect_exception_info(**kwargs):
     """
     Collect all exception information, store as a list of ExceptionInfo
     """
@@ -66,47 +72,45 @@ def collect_exception(**kwargs):
 
 def checkout(to_checkout):
     """
-    Checkout to particular versoin
+    Checkout to particular git versoin
     """
     # print "checkout to ", to_checkout
     subprocess.call(["git", "checkout", to_checkout])
 
 
 def compare_digest(from_digest, to_digest):
+    """
+    compare exception list from two versions
+    prepend each exception by + (added) or - (deleted) to show evolve
+    (exceptions remain the same would not print out)
+    """
     from_files = set(from_digest.keys())
     to_files = set(to_digest.keys())
 
-    add_files = to_files - from_files
-    delete_files = from_files - to_files
+    added_files = to_files - from_files
+    deleted_files = from_files - to_files
     common_files = from_files & to_files
 
-    if len(add_files) > 0:
-        # print "files added "
-        for f in add_files:
-            print f, " (file added)"
-            for sig in list(to_digest[f]):
-                print "+ %s" % sig
+    for f in added_files:
+        print f, " (file added)"
+        for sig in list(to_digest[f]):
+            print "+ %s" % sig
 
-    if len(delete_files) > 0:
-        # print "files deleted"
-        for f in delete_files:
-            print f, " (file deleted)"
-            for sig in list(from_digest[f]):
-                print "- %s" % sig
+    for f in deleted_files:
+        print f, " (file deleted)"
+        for sig in list(from_digest[f]):
+            print "- %s" % sig
 
     for common_file in common_files:
-        file_printed = False
         from_signature = sorted(list(from_digest[common_file]))
         to_signature = sorted(list(to_digest[common_file]))
-
         diffs = difflib.ndiff(from_signature, to_signature)
 
-        for d in diffs:
-            if d.startswith("+") or d.startswith("-"):
-                if not file_printed:
-                    print common_file
-                    file_printed = True
-                print d
+        to_print = [d for d in diffs if d.startswith("+") or d.startswith("-")]
+        if len(to_print) > 0:
+            print common_file
+            for t in to_print:
+                print t
 
 
 def group_by_version(exception_info_list):
@@ -129,7 +133,6 @@ def group_by_version(exception_info_list):
 
 
 def print_version_evolution(exception_info_list):
-    # group_by_version
     by_version = group_by_version(exception_info_list)
     for i in range(len(checkout_list) - 1):
         print ""
@@ -147,7 +150,7 @@ def print_exception_range(exception_info_list):
     for e in exception_info_list:
         dict_key = (e.filename, e.message)
         if dict_key in range_dict:
-            range_dict[dict_key].update(e.version, e.version_idx)
+            range_dict[dict_key].update(e.version, e.version_idx)  # extend range of each exception
         else:
             range_dict[dict_key] = Range(e.version, e.version_idx)
 
@@ -169,6 +172,9 @@ def hash_tuple(iterable):
 
 
 def reset_tables(**kwargs):
+    """
+    drop all tables and recreate schema
+    """
     con = kwargs['con']
     cur = kwargs['cur']
 
@@ -204,6 +210,9 @@ def reset_tables(**kwargs):
 
 
 def store_raw(**kwargs):
+    """
+    store exception info list to database without caring about duplicating issue
+    """
     con = kwargs['con']
     cur = kwargs['cur']
     exception_info_list = kwargs['exception_info_list']
@@ -285,8 +294,10 @@ def store_version_range(**kwargs):
     con.commit()
 
 
-def store_sqlite3(absolute_database_path, exception_info_list):
+def store_expection_list(absolute_database_path, exception_info_list):
     """
+    store exception information to database
+    it doesn't need very long time to collect exception list so I drop all tables everytime
     @type exception_info_list: list [ExceptionInfo]
     """
     con = None
@@ -314,7 +325,7 @@ def store_sqlite3(absolute_database_path, exception_info_list):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--srcpath", help="absolute root path of Cassandra source code",
-                        default="/home/jcwu/repos/cassandra")
+                        default="/Users/jcwu/repos/cassandra")
     parser.add_argument("-l", "--listfile", help="list of versions to checkout", default="list_to_checkout.txt")
     parser.add_argument("-f", "--excludefile", help="list of pattern to be excluded", default="files_to_exclude.txt")
 
@@ -334,9 +345,10 @@ if __name__ == '__main__':
 
         exception_info_list = []
         for to_checkout_idx in range(len(checkout_list)):
+            # need to_checkout_idx to sort checkout list from older to newer
             to_checkout = checkout_list[to_checkout_idx]
             checkout(to_checkout)
-            exception_digest = collect_exception(path=os.path.join(project_root, "src"),
+            exception_digest = collect_exception_info(path=os.path.join(project_root, "src"),
                                                  version=to_checkout,
                                                  version_idx=to_checkout_idx,
                                                  exclude_pattern=exclude_pattern)
@@ -345,7 +357,8 @@ if __name__ == '__main__':
         print_version_evolution(exception_info_list)
         print_exception_range(exception_info_list)
 
-        store_sqlite3(absolute_database_path, exception_info_list)
+        store_expection_list(absolute_database_path, exception_info_list)
     except Exception, e:
+        print e
         print e.message
         parser.print_help()
